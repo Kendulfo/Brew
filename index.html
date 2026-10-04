@@ -141,6 +141,50 @@
   .scaleBtns .sghost{background:#18181B;border:1px solid var(--line);color:var(--ink);font-weight:500}
   .scaleBtns button:disabled{opacity:.35}
   .scaleHint{font-size:12.5px;color:var(--mute);line-height:1.5;margin-top:18px}
+  .ehead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 0 16px}
+  .ehead strong{font-size:15px;font-weight:600}
+  .ehead button{font-size:14px;padding:9px 15px;border-radius:100px;border:1px solid var(--line);color:var(--mute)}
+  .ehead button.prim{background:var(--hot);color:#0A0A0B;border-color:var(--hot);font-weight:600}
+  #eName{width:100%;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px;
+    font-size:16px;color:var(--ink);margin-bottom:14px}
+  .egrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}
+  .efield{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px 12px}
+  .efield label{font-size:11px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}
+  .estep{display:flex;align-items:center;justify-content:space-between;margin-top:7px}
+  .estep button{width:40px;height:40px;border-radius:11px;background:#18181B;border:1px solid var(--line);
+    font-size:20px;color:var(--ink)}
+  .estep b{font-size:17px;font-weight:600}
+  .ewater{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 14px;
+    display:flex;align-items:baseline;gap:9px;margin-bottom:14px}
+  .ewater span{font-size:24px;font-weight:600;color:var(--hot)}
+  .ewater em{font-size:12px;font-style:normal;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}
+  .erow2{display:flex;gap:9px;margin-bottom:4px}
+  .erow2 button{flex:1;padding:13px;border-radius:12px;background:#18181B;border:1px solid var(--line);
+    font-size:13px;color:var(--ink)}
+  .erow2 button[aria-pressed="true"]{border-color:var(--hot);color:var(--hot)}
+  .esteps{list-style:none}
+  .estepRow{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px;margin-bottom:8px}
+  .estepTop{display:flex;align-items:center;gap:8px}
+  .estepTop .idx{font-size:12px;color:var(--mute);width:52px;flex:0 0 52px}
+  .estepTop input{width:100%;background:#18181B;border:1px solid var(--line);border-radius:9px;
+    padding:10px;font-size:15px;color:var(--ink);text-align:center}
+  .estepTop .cum{font-size:13px;color:var(--mute);width:58px;flex:0 0 58px;text-align:right}
+  .estepTop .rm{color:var(--mute);font-size:20px;padding:0 4px;flex:0 0 auto}
+  .estepNote{width:100%;background:#18181B;border:1px solid var(--line);border-radius:9px;
+    padding:10px;font-size:13.5px;color:var(--ink);margin-top:8px}
+  .ecap{display:flex;gap:8px;font-size:10.5px;color:var(--mute);letter-spacing:.06em;
+    text-transform:uppercase;padding:0 4px 6px}
+  .ecap i{font-style:normal}
+  .eadd{width:100%;padding:13px;border-radius:12px;background:#18181B;border:1px dashed var(--line);
+    color:var(--mute);font-size:13.5px}
+  .ewarn{background:#1C0F0E;border:1px solid var(--over);border-radius:12px;padding:12px 14px;
+    font-size:13px;color:#FF8E86;line-height:1.5;margin-top:10px}
+  .ewarn button{color:var(--hot);font-weight:600;text-decoration:underline}
+  .newBtn{width:100%;padding:15px;border-radius:14px;background:#18181B;border:1px dashed var(--line);
+    color:var(--ink);font-size:14.5px;font-weight:500;margin-bottom:14px}
+  .cardEdit{position:absolute;top:13px;right:13px;font-size:12px;color:var(--mute);
+    border:1px solid var(--line);border-radius:100px;padding:6px 11px}
+  .card{position:relative}
   .log{list-style:none}
   .log li{display:grid;grid-template-columns:1fr auto;gap:10px;padding:13px 14px;margin-bottom:6px;
     border-radius:12px;background:var(--card)}
@@ -235,6 +279,49 @@
 </section>
 
 <section id="pList" class="hide"></section>
+
+<section id="pEdit" class="hide">
+  <div class="ehead">
+    <button id="eCancel">Cancel</button>
+    <strong id="eTitle">New recipe</strong>
+    <button id="eSave" class="prim">Save</button>
+  </div>
+
+  <input id="eName" placeholder="Name it — e.g. Ethiopia, light" maxlength="34">
+
+  <div class="egrid">
+    <div class="efield">
+      <label>Dose</label>
+      <div class="estep"><button data-k="dose" data-d="-1">−</button><b id="vDose">15 g</b><button data-k="dose" data-d="1">+</button></div>
+    </div>
+    <div class="efield">
+      <label>Ratio</label>
+      <div class="estep"><button data-k="ratio" data-d="-1">−</button><b id="vRatio">1:15</b><button data-k="ratio" data-d="1">+</button></div>
+    </div>
+  </div>
+  <div class="ewater"><span id="vWater">225 g</span><em>total water</em></div>
+
+  <div class="egrid">
+    <div class="efield">
+      <label>Pours</label>
+      <div class="estep"><button data-k="pours" data-d="-1">−</button><b id="vPours">5</b><button data-k="pours" data-d="1">+</button></div>
+    </div>
+    <div class="efield">
+      <label>Every</label>
+      <div class="estep"><button data-k="cad" data-d="-5">−</button><b id="vCad">45 s</b><button data-k="cad" data-d="5">+</button></div>
+    </div>
+  </div>
+
+  <div class="erow2">
+    <button id="eBloom" aria-pressed="true">Bloom 2× dose</button>
+    <button id="eAuto">Rebuild evenly</button>
+  </div>
+
+  <div class="sec">Pours — edit any of them</div>
+  <ul class="esteps" id="eSteps"></ul>
+  <div class="ewarn hide" id="eWarn"></div>
+  <div class="foot"><p>Grams are what that pour adds. The running total is on the right. Seconds are how long you mean to take over it — the app compares that to the Dot's live flow and tells you if you're racing.</p></div>
+</section>
 <section id="pLog" class="hide">
   <div class="sec">Brew log</div>
   <ul class="log" id="logList"></ul>
@@ -608,6 +695,12 @@ function paint(){
       cue = near ? "Ease off — left" : "Pour — left";
       bigHTML = f.left.toFixed(f.left < 10 ? 1 : 0)+'<em>g</em>';
       sub = (f.step[2] || "Steady circles.") + " · to " + f.target + " g";
+      if(f.step[3]){
+        var prevG = f.i > 0 ? sc(cur.steps[f.i-1][1]) : 0;
+        var aim = (f.target - prevG) / f.step[3];
+        if(flow > 0.3) sub = "aim " + aim.toFixed(1) + " g/s · now " + flow.toFixed(1) +
+          (flow > aim*1.4 ? " — too fast" : flow < aim*0.6 ? " — too slow" : "");
+      }
       if(near) anim(big, "urge", "near"+f.i);
     } else {
       cls = "stage pour"; cue = "Pour now — to";
@@ -741,18 +834,27 @@ function renderStatic(){
   paint();
 }
 function renderList(){
-  $("pList").innerHTML = '<div class="sec">Mine</div>'+cards(RECIPES.slice(0,3))+
-    '<div class="sec">Published methods</div>'+cards(RECIPES.slice(3));
+  var mine = RECIPES.filter(function(r){ return r.custom; });
+  var stock = RECIPES.filter(function(r){ return !r.custom; });
+  $("pList").innerHTML =
+    '<button class="newBtn" id="newR">+ Build a recipe</button>' +
+    (mine.length ? '<div class="sec">Yours</div>'+cards(mine) : '') +
+    '<div class="sec">Starting points</div>'+cards(stock);
+  $("newR").onclick = function(){ openEditor(null); };
   [].slice.call($("pList").querySelectorAll(".card")).forEach(function(b){
-    b.onclick = function(){ cur = RECIPES.filter(function(r){return r.id===b.dataset.id;})[0];
-      $("reset").click(); renderStatic(); savePrefs(); tab("brew"); };
+    b.onclick = function(e){
+      var r = RECIPES.filter(function(x){return x.id===b.dataset.id;})[0];
+      if(e.target.closest(".cardEdit")){ openEditor(r, r.custom ? r.id : null); return; }
+      cur = r; $("reset").click(); renderStatic(); savePrefs(); tab("brew");
+    };
   });
 }
 function cards(list){
   return list.map(function(r){ var d = doses[r.id];
     return '<button class="card'+(r.id===cur.id?" on":"")+'" data-id="'+r.id+'"><h3>'+r.name+'</h3>'+
       '<div class="by">'+r.by+'</div><div class="meta">'+(d?d+' g (yours)':r.dose+' g')+' · 1:'+
-      (r.water/r.dose).toFixed(1)+' · '+r.temp+' · '+r.grind+'</div><div class="desc">'+r.desc+'</div></button>';
+      (r.water/r.dose).toFixed(1)+' · '+r.temp+' · '+r.grind+'</div><div class="desc">'+r.desc+'</div>'+
+      '<span class="cardEdit">'+(r.custom?'Edit':'Copy')+'</span></button>';
   }).join("");
 }
 [].slice.call(document.querySelectorAll(".taste button")).forEach(function(b){
@@ -791,6 +893,7 @@ function $logFootText(acc){
   } else { $("logFoot").textContent = log.length+" logged."; }
 }
 function tab(w){
+  $("pEdit").className = "hide";
   $("pBrew").className = w==="brew" ? "" : "hide";
   $("pScale").className = w==="scale" ? "" : "hide";
   $("pList").className = w==="list" ? "" : "hide";
@@ -810,5 +913,152 @@ function tab(w){
 $("tBrew").onclick=function(){tab("brew");}; $("tScale").onclick=function(){tab("scale");}; $("tList").onclick=function(){tab("list");}; $("tLog").onclick=function(){tab("log");};
 document.addEventListener("visibilitychange", function(){ if(!document.hidden && running && !linked) loop(); });
 renderStatic(); renderLog();
+
+/* ================= recipe editor =================
+   what the user types:  dose, ratio, pour count, cadence, per-pour grams,
+                         per-pour seconds, notes
+   what the app derives: total water, running totals, step times, drawdown
+   incremental in, cumulative out — nobody thinks in cumulative grams while
+   standing at the counter, but that is what the brew engine needs. */
+var ED = null, editingId = null;
+
+function loadCustom(){
+  try{ var c = JSON.parse(localStorage.getItem("brew:custom")||"[]");
+    c.forEach(function(r){ if(!RECIPES.some(function(x){return x.id===r.id;})) RECIPES.unshift(r); });
+  }catch(e){}
+}
+function saveCustom(){
+  try{
+    localStorage.setItem("brew:custom", JSON.stringify(RECIPES.filter(function(r){ return r.custom; })));
+  }catch(e){}
+}
+loadCustom();
+
+function blankDraft(from){
+  if(from){
+    var inc = [], prevG = 0;
+    from.steps.forEach(function(s){ inc.push({at:s[0], add:s[1]-prevG, dur:s[3]||Math.max(5,Math.round((s[1]-prevG)/8)), note:s[2]||""}); prevG = s[1]; });
+    return { name:(from.custom ? from.name : from.name+" (mine)"), dose:from.dose,
+             ratio:+(from.water/from.dose).toFixed(1), bloom2:true, cad:45, steps:inc };
+  }
+  return { name:"", dose:15, ratio:15, bloom2:true, cad:45, steps:null };
+}
+function rebuild(){
+  var total = Math.round(ED.dose * ED.ratio);
+  var bloom = Math.round(ED.dose * (ED.bloom2 ? 2 : 3));
+  var n = ED.pours || 5, rest = total - bloom, each = Math.round(rest / (n-1));
+  var out = [{at:0, add:bloom, dur:Math.max(6,Math.round(bloom/6)), note:"Bloom"}];
+  var run = bloom;
+  for(var i=1;i<n;i++){
+    var add = (i === n-1) ? (total - run) : each;
+    run += add;
+    out.push({at: 40 + (i-1)*ED.cad, add:add, dur:Math.max(5,Math.round(add/8)), note:""});
+  }
+  ED.steps = out;
+}
+function drawEditor(){
+  setText("vDose", ED.dose+" g");
+  setText("vRatio", "1:"+ED.ratio);
+  setText("vWater", Math.round(ED.dose*ED.ratio)+" g");
+  setText("vPours", String(ED.steps.length));
+  setText("vCad", ED.cad+" s");
+  $("eBloom").textContent = ED.bloom2 ? "Bloom 2× dose" : "Bloom 3× dose";
+  $("eName").value = ED.name;
+
+  var total = Math.round(ED.dose*ED.ratio), run = 0, rows = '<li class="ecap"><i style="width:52px;flex:0 0 52px">At</i><i style="flex:1">Add g</i><i style="flex:1">Secs</i><i style="width:58px;flex:0 0 58px;text-align:right">Total</i></li>';
+  ED.steps.forEach(function(s,i){
+    run += s.add;
+    rows += '<li class="estepRow" data-i="'+i+'"><div class="estepTop">'+
+      '<span class="idx">'+mmss(s.at)+'</span>'+
+      '<input type="number" inputmode="numeric" class="eAt" value="'+s.at+'" aria-label="start second">'+
+      '<input type="number" inputmode="decimal" class="eAdd" value="'+s.add+'" aria-label="grams to add">'+
+      '<input type="number" inputmode="numeric" class="eDur" value="'+s.dur+'" aria-label="pour seconds">'+
+      '<span class="cum">'+run+' g</span>'+
+      '<button class="rm" aria-label="remove">×</button></div>'+
+      '<input class="estepNote" placeholder="What to do here — swirl, pour centre-out…" value="'+
+        (s.note||"").replace(/"/g,"&quot;")+'"></li>';
+  });
+  rows += '<li><button class="eadd" id="eAdd">+ Add a pour</button></li>';
+  $("eSteps").innerHTML = rows;
+
+  var w = [], last = -1;
+  for(var i=0;i<ED.steps.length;i++){
+    var s = ED.steps[i];
+    if(s.at <= last && i > 0) w.push("Pour "+(i+1)+" starts before pour "+i+" does.");
+    if(i < ED.steps.length-1 && s.at + s.dur > ED.steps[i+1].at)
+      w.push("Pour "+(i+1)+" runs "+s.dur+"s but the next one starts "+(ED.steps[i+1].at - s.at)+"s later.");
+    last = s.at;
+  }
+  if(run !== total) w.push("Pours add up to "+run+" g, not "+total+" g. <button id='eBal'>Balance the last pour</button>");
+  if(w.length){ $("eWarn").className = "ewarn"; $("eWarn").innerHTML = w.join("<br>"); }
+  else $("eWarn").className = "ewarn hide";
+
+  var bal = $("eBal");
+  if(bal) bal.onclick = function(){
+    var r = 0; for(var i=0;i<ED.steps.length-1;i++) r += ED.steps[i].add;
+    ED.steps[ED.steps.length-1].add = total - r; drawEditor();
+  };
+  $("eAdd").onclick = function(){
+    var l = ED.steps[ED.steps.length-1];
+    ED.steps.push({at:l.at + ED.cad, add:30, dur:5, note:""}); drawEditor();
+  };
+  [].slice.call($("eSteps").querySelectorAll(".estepRow")).forEach(function(row){
+    var i = +row.dataset.i;
+    row.querySelector(".eAt").onchange   = function(){ ED.steps[i].at   = Math.max(0,+this.value|0); drawEditor(); };
+    row.querySelector(".eAdd").onchange  = function(){ ED.steps[i].add  = Math.max(0,+this.value);   drawEditor(); };
+    row.querySelector(".eDur").onchange  = function(){ ED.steps[i].dur  = Math.max(1,+this.value|0); drawEditor(); };
+    row.querySelector(".estepNote").onchange = function(){ ED.steps[i].note = this.value.slice(0,60); };
+    row.querySelector(".rm").onclick = function(){
+      if(ED.steps.length <= 1) return;
+      ED.steps.splice(i,1); drawEditor();
+    };
+  });
+}
+function openEditor(from, id){
+  ED = blankDraft(from); editingId = id || null;
+  if(!ED.steps){ ED.pours = 5; rebuild(); }
+  setText("eTitle", id ? "Edit recipe" : "New recipe");
+  prev = {}; drawEditor();
+  $("pBrew").className = "hide"; $("pList").className = "hide"; $("pLog").className = "hide";
+  $("pScale").className = "hide"; $("pEdit").className = "";
+  $("actionBar").className = "bar hide";
+  document.body.style.paddingBottom = "84px";
+  window.scrollTo(0,0);
+}
+document.addEventListener("click", function(e){
+  var b = e.target.closest && e.target.closest(".estep button");
+  if(!b || !ED) return;
+  var k = b.dataset.k, d = +b.dataset.d;
+  if(k === "dose")  ED.dose  = Math.min(40, Math.max(8, ED.dose + d));
+  if(k === "ratio") ED.ratio = Math.min(20, Math.max(10, +(ED.ratio + d*0.5).toFixed(1)));
+  if(k === "cad")   ED.cad   = Math.min(120, Math.max(10, ED.cad + d));
+  if(k === "pours"){ ED.pours = Math.min(9, Math.max(1, ED.steps.length + d)); rebuild(); }
+  if(k === "dose" || k === "ratio") rebuild();
+  drawEditor();
+});
+$("eBloom").onclick = function(){ ED.bloom2 = !ED.bloom2; rebuild(); drawEditor(); };
+$("eAuto").onclick  = function(){ ED.pours = ED.steps.length; rebuild(); drawEditor(); };
+$("eCancel").onclick = function(){ ED = null; tab("list"); };
+$("eSave").onclick = function(){
+  var name = ($("eName").value || "").trim();
+  if(!name){ $("eName").focus(); $("eWarn").className = "ewarn"; $("eWarn").textContent = "Give it a name first."; return; }
+  var run = 0, steps = ED.steps.map(function(s){ run += s.add; return [s.at, Math.round(run), s.note, s.dur]; });
+  var last = ED.steps[ED.steps.length-1];
+  var rec = {
+    id: editingId || ("my-" + Date.now().toString(36)),
+    custom: true, name: name, by: "Mine",
+    dose: ED.dose, water: Math.round(run), temp: "94 °C", grind: "your setting",
+    drawdown: last.at + last.dur + 45,
+    desc: ED.steps.length + " pours, " + Math.round(run) + " g at 1:" + (run/ED.dose).toFixed(1) + ".",
+    steps: steps,
+    foot: "<p>Your recipe. Edit it any time from the Recipes tab.</p>"
+  };
+  var at = -1;
+  for(var i=0;i<RECIPES.length;i++) if(RECIPES[i].id === rec.id) at = i;
+  if(at >= 0) RECIPES[at] = rec; else RECIPES.unshift(rec);
+  saveCustom();
+  cur = rec; doses[rec.id] = rec.dose; savePrefs(); renderStatic();
+  ED = null; tone("stop"); tab("brew");
+};
 </script>
 </body></html>
