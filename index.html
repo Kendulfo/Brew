@@ -94,19 +94,22 @@
 
   /* controls */
   .bar{position:fixed;z-index:2;left:0;right:0;bottom:calc(56px + env(safe-area-inset-bottom));
-    max-width:560px;margin:0 auto;display:flex;gap:9px;padding:10px 16px 12px;
-    background:linear-gradient(to top,#0A0A0B 72%,rgba(10,10,11,0))}
+    max-width:560px;margin:0 auto;display:block;padding:10px 16px 12px;
+    background:linear-gradient(to top,#0A0A0B 78%,rgba(10,10,11,0))}
+  .barRow{display:flex;gap:9px}
+  .mode{display:flex;align-items:center;gap:6px;margin-bottom:9px;
+    background:#141416;border:1px solid var(--line);border-radius:13px;padding:4px}
+  .mode button{flex:0 0 auto;padding:9px 15px;border-radius:10px;font-size:13px;
+    color:var(--mute);font-weight:500;transition:background 180ms,color 180ms}
+  .mode button[aria-pressed="true"]{background:var(--hot);color:#0A0A0B;font-weight:600}
+  .modeHint{flex:1;font-size:11.5px;color:var(--mute);line-height:1.3;text-align:right;
+    padding-right:8px;overflow:hidden}
   .bar button{padding:17px;border-radius:14px;font-size:16px;font-weight:600;transition:transform 120ms,opacity 200ms}
   .bar button:active{transform:scale(.97)}
   .bar .go{flex:1;background:var(--hot);color:#0A0A0B}
   .bar .go.on{background:#242428;color:var(--ink)}
   .bar .gh{flex:0 0 86px;background:#18181B;border:1px solid var(--line);color:var(--ink);font-weight:500}
 
-  .autorow{display:flex;align-items:center;gap:11px;margin-bottom:16px}
-  .autorow button{font-size:12.5px;padding:9px 14px;border-radius:100px;border:1px solid var(--line);
-    background:#18181B;color:var(--mute);white-space:nowrap}
-  .autorow button[aria-pressed="true"]{border-color:var(--hot);color:var(--hot)}
-  .autorow span{font-size:12px;color:var(--mute);line-height:1.35}
   .dose{display:flex;align-items:center;gap:12px;margin-bottom:18px}
   .dose .lab{font-size:12.5px;color:var(--mute);flex:1;line-height:1.35}
   .dose button{width:50px;height:50px;flex:0 0 50px;background:#18181B;border:1px solid var(--line);
@@ -191,8 +194,13 @@
   .ewarn{background:#1C0F0E;border:1px solid var(--over);border-radius:12px;padding:12px 14px;
     font-size:13px;color:#FF8E86;line-height:1.5;margin-top:10px}
   .ewarn button{color:var(--hot);font-weight:600;text-decoration:underline}
-  .newBtn{width:100%;padding:15px;border-radius:14px;background:#18181B;border:1px dashed var(--line);
-    color:var(--ink);font-size:14.5px;font-weight:500;margin-bottom:14px}
+  .newBtn{width:100%;padding:17px;border-radius:14px;background:var(--hot);border:0;
+    color:#0A0A0B;font-size:16px;font-weight:600;margin-bottom:6px;letter-spacing:-.01em;
+    display:flex;align-items:center;justify-content:center;gap:9px;transition:transform 120ms}
+  .newBtn:active{transform:scale(.985)}
+  .newBtn i{font-style:normal;font-size:20px;line-height:1;font-weight:400}
+  .newHint{font-size:12.5px;color:var(--mute);line-height:1.45;margin-bottom:20px;text-align:center}
+  .cardGrid{display:grid;gap:9px}
   .cardEdit{position:absolute;top:13px;right:13px;font-size:12px;color:var(--mute);
     border:1px solid var(--line);border-radius:100px;padding:6px 11px}
   .card{position:relative}
@@ -229,7 +237,7 @@
        primary control belongs */
     .tabs{top:0;bottom:auto;border-top:none;border-bottom:1px solid var(--line);
       max-width:none;padding:0 28px;padding-top:env(safe-area-inset-top);
-      justify-content:flex-start;gap:4px;backdrop-filter:blur(12px);background:rgba(10,10,11,.86)}
+      justify-content:center;gap:6px;backdrop-filter:blur(12px);background:rgba(10,10,11,.86)}
     .tabs button{flex:0 0 auto;padding:19px 22px;font-size:14px}
     .tabs button[aria-selected="true"]{box-shadow:inset 0 -2px 0 var(--hot)}
 
@@ -271,11 +279,21 @@
        controls, instead of stretching across dead space */
     .bar{bottom:0;max-width:1040px;padding:14px 28px calc(16px + env(safe-area-inset-bottom));
       background:linear-gradient(to top,#0A0A0B 78%,rgba(10,10,11,0))}
-    .bar button{padding:19px;font-size:17px;border-radius:16px}
+    .bar .barRow button{padding:19px;font-size:17px;border-radius:16px}
+    .mode{padding:5px;margin-bottom:11px}
+    .mode button{padding:11px 20px;font-size:14px}
+    .modeHint{font-size:12.5px}
     .bar .gh{flex:0 0 120px}
 
-    /* reading screens stay a comfortable measure rather than stretching */
-    #pList,#pLog,#pEdit{max-width:720px}
+    /* reading screens centre instead of hugging the left edge */
+    #pLog,#pEdit{max-width:720px;margin:0 auto}
+    #pList{max-width:960px;margin:0 auto}
+    .cardGrid{grid-template-columns:1fr 1fr;gap:12px}
+    .card{display:flex;flex-direction:column}
+    .card .desc{margin-top:auto;padding-top:7px}
+    .newBtn{max-width:420px;margin:0 auto 6px;padding:18px}
+    .newHint{margin-bottom:26px}
+    .sec{margin:26px 0 12px}
     #pScale .scaleWrap{max-width:620px;margin:8px auto 0;padding:58px 24px 32px}
     .scaleNum{font-size:132px}
     .scaleNum em{font-size:32px}
@@ -334,11 +352,6 @@
   </div><!-- /colA -->
 
   <div class="colB">
-  <div class="autorow">
-    <button id="autoTog" aria-pressed="true">Auto-start on</button>
-    <span>Arm it, then pour — the clock starts on first water</span>
-  </div>
-
   <div class="dose">
     <span class="lab">Dose — scales the recipe, saved per recipe</span>
     <button id="dDn" aria-label="Less coffee">−</button>
@@ -425,9 +438,16 @@
 </section>
 
 <div class="bar" id="actionBar">
-  <button class="go" id="run">Start</button>
-  <button class="gh" id="tare">Tare</button>
-  <button class="gh" id="reset">Reset</button>
+  <div class="mode">
+    <button id="autoTog" aria-pressed="true">Auto-start</button>
+    <button id="manTog" aria-pressed="false">Manual</button>
+    <span class="modeHint" id="modeHint">Clock starts on first water</span>
+  </div>
+  <div class="barRow">
+    <button class="go" id="run">Start</button>
+    <button class="gh" id="tare">Tare</button>
+    <button class="gh" id="reset">Reset</button>
+  </div>
 </div>
 
 <nav class="tabs">
@@ -657,6 +677,7 @@ function onState(s){
   else if(s === "connecting"){ l.textContent = "Connecting…"; }
   else { linked = false; d.className = "dot"; b.textContent = "Connect";
          l.textContent = s === "lost" ? "Scale dropped — back on the clock" : "Scale not connected — running on the clock"; }
+  if(document.getElementById("autoTog")) drawMode();
   paint();
 }
 var win = [];
@@ -881,9 +902,10 @@ function loop(){
   if(!running || rafOn) return;
   rafOn = true; requestAnimationFrame(pump);
 }
-async function beginRun(){
-  running = true; tone("pour");
-  if(linked){ await scale.start(); clk = 0; }
+async function beginRun(resume){
+  running = true; if(!resume) tone("pour");
+  $("run").textContent = "Pause"; $("run").className = "go on";   // before any await
+  if(linked){ await scale.start(); if(!resume) clk = 0; }
   else { t0 = Date.now() - clk*1000; }
   rafOn = false; loop();
   $("run").textContent = "Pause"; $("run").className = "go on";
@@ -894,11 +916,14 @@ $("run").onclick = async function(){
   unlock();
   if(running){
     running = false; rafOn = false; clearInterval(ticker);
-    $("run").textContent = "Resume"; $("run").className = "go on";
+    $("run").className = "go on"; drawMode();
     if(linked) await scale.pause(); else t0 = Date.now() - clk*1000;
     return;
   }
-  if(armed){ armed = false; $("run").textContent = "Start"; paint(); return; }
+  if(armed){ armed = false; $("run").textContent = runLabel(); drawMode(); paint(); return; }
+  /* paused mid-brew: resume where we left off — never re-tare, that would
+     zero the water already in the cone */
+  if(clk > 0){ beginRun(true); return; }
   if(auto && linked){
     await scale.tare();
     armBase = 0; armed = true; tone("arm");
@@ -911,17 +936,18 @@ $("tare").onclick = function(){ if(linked){ scale.tare(); tone("arm"); } };
 $("reset").onclick = function(){
   running = false; armed = false; clearInterval(ticker); clk = 0; weight = 0; hits = {}; cued = {}; lastKind = "";
   if(linked) scale.reset();
-  $("run").textContent = "Start"; $("run").className = "go";
+  $("run").className = "go"; $("run").textContent = runLabel(); drawMode();
   $("saveBox").className = "save hide"; $("verdict").className = "verdict hide"; taste = null;
   [].slice.call(document.querySelectorAll(".taste button")).forEach(function(b){ b.setAttribute("aria-pressed","false"); });
   paint();
 };
 document.addEventListener("click", function(e){
-  if(e.target.closest && e.target.closest("#autoTog")){
-    auto = !auto;
-    $("autoTog").setAttribute("aria-pressed", String(auto));
-    $("autoTog").textContent = auto ? "Auto-start on" : "Auto-start off";
-    savePrefs(); paint(); return;
+  var m = e.target.closest && e.target.closest("#autoTog,#manTog");
+  if(m){
+    var next = (m.id === "autoTog");
+    if(next !== auto){ auto = next; savePrefs(); }
+    if(armed && !auto){ armed = false; }
+    drawMode(); paint(); return;
   }
   var b = e.target.closest && e.target.closest("#dUp,#dDn");
   if(!b) return;
@@ -931,10 +957,22 @@ document.addEventListener("click", function(e){
 });
 
 /* ---------- render ---------- */
+function runLabel(){
+  if(running) return "Pause";
+  if(armed) return "Waiting…";
+  if(clk > 0) return "Resume";                 // paused mid-brew
+  return (auto && linked) ? "Arm & pour" : "Start";
+}
+function drawMode(){
+  $("autoTog").setAttribute("aria-pressed", String(auto));
+  $("manTog").setAttribute("aria-pressed", String(!auto));
+  setText("modeHint", !linked ? "Connect the Dot to use auto-start"
+    : auto ? "Clock starts on first water" : "You start the clock yourself");
+  if(!running) $("run").textContent = runLabel();
+}
 function renderStatic(){
   $("rName").textContent = cur.name; $("rBy").textContent = cur.by;
-  $("autoTog").setAttribute("aria-pressed", String(auto));
-  $("autoTog").textContent = auto ? "Auto-start on" : "Auto-start off";
+  drawMode();
   $("dVal").textContent = dose()+" g";
   $("steps").innerHTML = cur.steps.map(function(s){
     return '<li class="step"><span class="t">'+mmss(s[0])+'</span><span class="n">'+(s[2]||"Pour")+
@@ -948,9 +986,10 @@ function renderList(){
   var mine = RECIPES.filter(function(r){ return r.custom; });
   var stock = RECIPES.filter(function(r){ return !r.custom; });
   $("pList").innerHTML =
-    '<button class="newBtn" id="newR">+ Build a recipe</button>' +
-    (mine.length ? '<div class="sec">Yours</div>'+cards(mine) : '') +
-    '<div class="sec">Starting points</div>'+cards(stock);
+    '<button class="newBtn" id="newR"><i>+</i>Build a recipe</button>' +
+    '<div class="newHint">Set a dose and ratio and it writes the pours for you — or copy one below and change it.</div>' +
+    (mine.length ? '<div class="sec">Yours</div><div class="cardGrid">'+cards(mine)+'</div>' : '') +
+    '<div class="sec">Starting points</div><div class="cardGrid">'+cards(stock)+'</div>';
   $("newR").onclick = function(){ openEditor(null); };
   [].slice.call($("pList").querySelectorAll(".card")).forEach(function(b){
     b.onclick = function(e){
