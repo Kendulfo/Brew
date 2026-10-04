@@ -191,7 +191,11 @@
    Protocol: Timemore Black Mirror SCALE BLE Protocol v1.0.3
    Frame: A5 5A | opcode | cmd | len(2,BE) | payload | crc16(2,BE)
    CRC: reflected poly 0xA001, init 0xFFFF, no final xor, high byte first */
-var SVC = 0xFFF0, UPLINK = 0xFFF1, DOWNLINK = 0xFFF2;
+/* canonical 128-bit forms: some Web Bluetooth implementations reject the
+   0xFFF0 shorthand in filters even though the spec allows it */
+var SVC = "0000fff0-0000-1000-8000-00805f9b34fb";
+var UPLINK = "0000fff1-0000-1000-8000-00805f9b34fb";
+var DOWNLINK = "0000fff2-0000-1000-8000-00805f9b34fb";
 
 function crc16(bytes){
   var c = 0xFFFF;
@@ -220,12 +224,17 @@ function Scale(onData, onState){
   this.onData = onData; this.onState = onState;
   this.buf = []; this.dev = null; this.tx = null;
 }
-Scale.prototype.connect = async function(){
+Scale.prototype.connect = async function(anyAll){
   if(!navigator.bluetooth) throw new Error("no-webbluetooth");
   this.onState("scanning");
-  this.dev = await navigator.bluetooth.requestDevice({
-    filters:[{services:[SVC]}], optionalServices:[SVC]
-  });
+  /* anyAll: show every BLE device, for when the Dot's advert carries no
+     service UUID (it does that outside pairing mode) */
+  var opts = anyAll
+    ? { acceptAllDevices:true, optionalServices:[SVC] }
+    : { filters:[{services:[SVC]},{namePrefix:"Dot"},{namePrefix:"DOT"},
+                 {namePrefix:"dot"},{namePrefix:"TES"},{namePrefix:"TIMEMORE"}],
+        optionalServices:[SVC] };
+  this.dev = await navigator.bluetooth.requestDevice(opts);
   this.dev.addEventListener("gattserverdisconnected", function(){ this.onState("lost"); }.bind(this));
   this.onState("connecting");
   var server = await this.dev.gatt.connect();
@@ -364,15 +373,36 @@ function onData(d){
   $("lF").innerHTML = '<span class="'+(d.flow>9?"warn":"")+'">'+d.flow.toFixed(1)+" g/s</span>";
   paint();
 }
+var anyAll = false;
 $("cBtn").onclick = async function(){
   if(linked){ scale.disconnect(); onState("idle"); return; }
   if(!navigator.bluetooth){
-    $("cLab").textContent = "This browser has no Bluetooth. Open in Bluefy.";
+    $("cLab").textContent = "This browser has no Bluetooth. Open the page in Bluefy, not Safari.";
     return;
   }
   scale = scale || new Scale(onData, onState);
-  try{ await scale.connect(); }
-  catch(e){ onState("idle"); $("cLab").textContent = "Couldn't connect — wake the Dot and retry"; }
+  try{
+    await scale.connect(anyAll);
+    anyAll = false;
+  }catch(e){
+    onState("idle");
+    var n = e && e.name ? e.name : "Error";
+    if(n === "NotFoundError"){
+      if(!anyAll){
+        anyAll = true;
+        $("cLab").textContent = "No Dot in that list. Tap Connect again — next try shows every nearby device.";
+        $("cBtn").textContent = "Scan all";
+      } else {
+        $("cLab").textContent = "Still nothing. Press the Dot's button to wake it, then retry.";
+      }
+    } else if(n === "NetworkError"){
+      $("cLab").textContent = "Connected then dropped. Something else is holding it — force-quit the Timemore app.";
+    } else if(n === "SecurityError"){
+      $("cLab").textContent = "Blocked. The page must be https and opened in Bluefy.";
+    } else {
+      $("cLab").textContent = n + ": " + ((e && e.message) || "unknown");
+    }
+  }
 };
 
 /* ---------- phase: weight-driven when linked, time-driven when not ---------- */
