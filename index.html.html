@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#DCE0D8;color:#141C18;color-scheme:light only">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#DCE0D8">
+<title>Brew · Dot</title>
+<style>
+  html,body{background:#DCE0D8 !important;color:#141C18 !important}
+  *{box-sizing:border-box;margin:0;padding:0;color:#141C18;-webkit-tap-highlight-color:transparent}
+  body{font-family:"Avenir Next","Segoe UI",system-ui,sans-serif;font-variant-numeric:tabular-nums;
+    max-width:560px;margin:0 auto;padding:12px 16px calc(150px + env(safe-area-inset-bottom));min-height:100vh}
+  button{font:inherit;cursor:pointer;border:0;background:none;touch-action:manipulation;user-select:none}
+  .hide{display:none !important}
+
+  .conn{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #BFC6BB;border-radius:3px;margin-bottom:12px}
+  .dot{width:9px;height:9px;border-radius:50%;background:#B0B8AE;flex:0 0 9px;transition:background 300ms}
+  .dot.live{background:#2E7D4F;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .conn .lab{flex:1;font-size:13px;color:#5A675E;line-height:1.3}
+  .conn button{font-size:13px;padding:9px 14px;border:1px solid #141C18;border-radius:3px}
+
+  .top{display:flex;align-items:baseline;justify-content:space-between;padding:2px 0 12px;gap:12px}
+  .top h1{font-size:15px;font-weight:600}
+  .top .r{font-size:13px;color:#5A675E;white-space:nowrap}
+
+  .stage{position:relative;overflow:hidden;border:1px solid #141C18;border-radius:3px;background:#E6E9E1}
+  .flood{position:absolute;left:0;right:0;bottom:0;height:0;background:#141C18;transition:height 420ms cubic-bezier(.32,.72,.2,1)}
+  .stage.stop .flood{height:100%;background:#9E3218}
+  .stage.pour .flood{height:100%}
+  .inner{position:relative;z-index:1;padding:18px 16px}
+  .cue{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:#5A675E;transition:color 260ms}
+  .target{font-size:76px;font-weight:600;line-height:.95;letter-spacing:-.03em;margin:6px 0 2px;transition:color 260ms}
+  .target em{font-size:22px;font-weight:400;font-style:normal;margin-left:4px}
+  .sub2{font-size:15px;color:#5A675E;min-height:20px;line-height:1.3;transition:color 260ms}
+  .stage.pour .cue,.stage.stop .cue{color:#9BB09F}
+  .stage.stop .cue{color:#F0CEC6}
+  .stage.pour .target,.stage.pour .target em,.stage.pour .sub2,.stage.pour .clock,.stage.pour .of,
+  .stage.stop .target,.stage.stop .target em,.stage.stop .sub2,.stage.stop .clock,.stage.stop .of{color:#E6E9E1}
+  .stage.pour .sub2,.stage.pour .of{color:#9BB09F}
+  .stage.stop .sub2,.stage.stop .of{color:#F0CEC6}
+  .clockrow{display:flex;align-items:baseline;justify-content:space-between;margin-top:16px}
+  .clock{font-size:26px;font-weight:600;transition:color 260ms}
+  .of{font-size:14px;color:#5A675E;transition:color 260ms}
+  .gauge{display:flex;gap:2px;margin-top:14px;height:8px}
+  .gauge i{flex:1;background:#C6CCC1;transition:background 160ms}
+  .stage.pour .gauge i{background:#3A4740}
+  .gauge i.on{background:#141C18}
+  .stage.pour .gauge i.on{background:#E6E9E1}
+  .stage.stop .gauge i{background:#C76B57}
+  .stage.stop .gauge i.on{background:#F7E9E5}
+  @keyframes tick{0%{transform:scale(1.045)}100%{transform:scale(1)}}
+  @keyframes urge{0%{transform:scale(1.11)}60%{transform:scale(.99)}100%{transform:scale(1)}}
+  .tick{animation:tick 340ms cubic-bezier(.2,.9,.3,1)}
+  .urge{animation:urge 420ms cubic-bezier(.2,.9,.3,1)}
+
+  .live{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#BFC6BB;border:1px solid #BFC6BB;margin:12px 0 18px}
+  .live div{background:#DCE0D8;padding:9px 10px}
+  .live dt{font-size:11px;color:#5A675E}
+  .live dd{font-size:18px;font-weight:600;margin-top:2px}
+  .live dd.warn{color:#9E3218}
+
+  .bar{position:fixed;z-index:2;left:0;right:0;bottom:calc(54px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;
+    display:flex;gap:8px;padding:10px 16px 12px;background:#DCE0D8;border-top:1px solid #BFC6BB}
+  .bar button{padding:17px;border-radius:3px;font-size:16px;font-weight:600;border:1px solid #141C18;transition:transform 120ms}
+  .bar button:active{transform:scale(.975)}
+  .bar .go{flex:1;background:#141C18;color:#DCE0D8}
+  .bar .go.on{background:#DCE0D8;color:#141C18}
+  .bar .gh{flex:0 0 92px;background:#DCE0D8;font-weight:400}
+
+  .dose{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .dose .lab{font-size:13px;color:#5A675E;flex:1;line-height:1.35}
+  .dose button{width:52px;height:52px;flex:0 0 52px;background:#DCE0D8;border:1px solid #141C18;border-radius:3px;font-size:22px}
+  .dose .val{font-size:19px;font-weight:600;min-width:58px;text-align:center}
+
+  .steps{list-style:none;border-top:1px solid #BFC6BB}
+  .step{position:relative;display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:baseline;
+    padding:14px 4px 14px 10px;border-bottom:1px solid #BFC6BB;transition:opacity 400ms,background 300ms}
+  .step:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#9E3218;transform:scaleY(0);
+    transform-origin:top;transition:transform 380ms cubic-bezier(.2,.8,.3,1)}
+  .step.now:before{transform:scaleY(1)}
+  .step.now{background:#D2D8CE}
+  .step.done{opacity:.38}
+  .step .t{font-size:17px;font-weight:600}
+  .step .n{font-size:13.5px;color:#5A675E;line-height:1.35}
+  .step .g{font-size:21px;font-weight:600}
+  .step .g em{font-size:13px;font-weight:400;font-style:normal;color:#5A675E}
+  .step .hit{font-size:12px;color:#5A675E;display:block;font-weight:400}
+
+  .foot{margin-top:20px;font-size:13.5px;line-height:1.55}
+  .foot p{margin-bottom:8px;color:#5A675E}
+  .sec{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:#5A675E;margin:22px 0 10px}
+  .sec:first-child{margin-top:4px}
+  .card{display:block;width:100%;text-align:left;border:1px solid #BFC6BB;border-radius:3px;padding:14px;margin-bottom:10px;background:#DCE0D8}
+  .card.on{border-color:#141C18;background:#E6E9E1}
+  .card h3{font-size:16px;font-weight:600}
+  .card .by{font-size:12.5px;color:#5A675E;margin-top:1px}
+  .card .meta{font-size:13px;color:#5A675E;margin-top:8px}
+  .card .desc{font-size:13.5px;color:#5A675E;margin-top:8px;line-height:1.45}
+  .log{list-style:none}
+  .log li{display:grid;grid-template-columns:1fr auto;gap:10px;padding:13px 2px;border-bottom:1px solid #BFC6BB}
+  .log .lt{font-size:14.5px;font-weight:600}
+  .log .ls{font-size:12.5px;color:#5A675E;margin-top:2px;line-height:1.4}
+  .log .del{color:#5A675E;font-size:20px;padding:0 8px;align-self:center}
+  .empty{font-size:14px;color:#5A675E;line-height:1.5;padding:10px 0;display:block}
+  .save{border:1px solid #141C18;border-radius:3px;padding:16px;margin-bottom:18px;background:#E6E9E1}
+  .save h4{font-size:15px;font-weight:600;margin-bottom:12px}
+  .taste{display:flex;gap:8px;margin-bottom:12px}
+  .taste button{flex:1;padding:13px 4px;border:1px solid #BFC6BB;border-radius:3px;font-size:13.5px;background:#DCE0D8}
+  .taste button[aria-pressed="true"]{background:#141C18;color:#DCE0D8}
+  .save .do{width:100%;padding:14px;border:1px solid #141C18;background:#141C18;color:#DCE0D8;border-radius:3px;font-weight:600}
+  .verdict{font-size:13.5px;color:#9E3218;margin-top:10px;line-height:1.45}
+  .tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#DCE0D8;border-top:1px solid #BFC6BB;
+    padding-bottom:env(safe-area-inset-bottom);max-width:560px;margin:0 auto;z-index:3}
+  .tabs button{flex:1;padding:16px 0 17px;font-size:13.5px;color:#5A675E}
+  .tabs button[aria-selected="true"]{color:#141C18;font-weight:600;box-shadow:inset 0 2px 0 #141C18}
+  @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+</style>
+</head>
+<body>
+
+<div class="conn">
+  <span class="dot" id="cDot"></span>
+  <span class="lab" id="cLab">Scale not connected — running on the clock</span>
+  <button id="cBtn">Connect</button>
+</div>
+
+<div class="top"><h1 id="rName">—</h1><span class="r" id="rBy"></span></div>
+
+<section id="pBrew">
+  <div class="stage" id="stage">
+    <div class="flood"></div>
+    <div class="inner">
+      <div class="cue" id="cue">Ready</div>
+      <div class="target" id="big" aria-live="polite">0<em>g</em></div>
+      <div class="sub2" id="sub">Tare with the brewer on, then start.</div>
+      <div class="gauge" id="gauge"></div>
+      <div class="clockrow"><span class="clock" id="clock">0:00</span><span class="of" id="of"></span></div>
+    </div>
+  </div>
+
+  <dl class="live" id="liveRow">
+    <div><dt>On scale</dt><dd id="lW">—</dd></div>
+    <div><dt>Flow</dt><dd id="lF">—</dd></div>
+    <div><dt>Battery</dt><dd id="lB">—</dd></div>
+  </dl>
+
+  <div class="dose">
+    <span class="lab">Dose — scales the recipe, saved per recipe</span>
+    <button id="dDn" aria-label="Less coffee">−</button>
+    <span class="val" id="dVal">15 g</span>
+    <button id="dUp" aria-label="More coffee">+</button>
+  </div>
+
+  <div class="save hide" id="saveBox">
+    <h4>How did it taste?</h4>
+    <div class="taste">
+      <button data-v="sour">Sour / thin</button>
+      <button data-v="good">Balanced</button>
+      <button data-v="bitter">Bitter / heavy</button>
+    </div>
+    <button class="do" id="saveBtn">Log this brew</button>
+    <div class="verdict hide" id="verdict"></div>
+  </div>
+
+  <ul class="steps" id="steps"></ul>
+  <div class="foot" id="foot"></div>
+</section>
+
+<section id="pList" class="hide"></section>
+<section id="pLog" class="hide">
+  <div class="sec">Brew log</div>
+  <ul class="log" id="logList"></ul>
+  <div class="foot"><p id="logFoot"></p></div>
+</section>
+
+<div class="bar" id="actionBar">
+  <button class="go" id="run">Start</button>
+  <button class="gh" id="tare">Tare</button>
+  <button class="gh" id="reset">Reset</button>
+</div>
+
+<nav class="tabs">
+  <button id="tBrew" aria-selected="true">Brew</button>
+  <button id="tList" aria-selected="false">Recipes</button>
+  <button id="tLog" aria-selected="false">Log</button>
+</nav>
+<script>
+/* Timemore Dot (TES017) — Web Bluetooth driver
+   Protocol: Timemore Black Mirror SCALE BLE Protocol v1.0.3
+   Frame: A5 5A | opcode | cmd | len(2,BE) | payload | crc16(2,BE)
+   CRC: reflected poly 0xA001, init 0xFFFF, no final xor, high byte first */
+var SVC = 0xFFF0, UPLINK = 0xFFF1, DOWNLINK = 0xFFF2;
+
+function crc16(bytes){
+  var c = 0xFFFF;
+  for(var i=0;i<bytes.length;i++){
+    c ^= bytes[i];
+    for(var k=0;k<8;k++){ c = (c & 1) ? ((c >> 1) ^ 0xA001) : (c >> 1); }
+  }
+  return c & 0xFFFF;
+}
+function frame(opcode, cmd, payload){
+  payload = payload || [];
+  var head = [0xA5,0x5A,opcode,cmd,(payload.length>>8)&0xFF,payload.length&0xFF].concat(payload);
+  var c = crc16(head);
+  return new Uint8Array(head.concat([(c>>8)&0xFF, c&0xFF]));
+}
+var CMD = {
+  tare:       function(){ return frame(0x03,0x0D,[]); },
+  timerStart: function(){ return frame(0x03,0x02,[0x01]); },
+  timerPause: function(){ return frame(0x03,0x02,[0x02]); },
+  timerReset: function(){ return frame(0x03,0x02,[0x03]); },
+  unitGram:   function(){ return frame(0x03,0x06,[0x00]); },
+  battery:    function(){ return frame(0x02,0x05,[]); }
+};
+
+function Scale(onData, onState){
+  this.onData = onData; this.onState = onState;
+  this.buf = []; this.dev = null; this.tx = null;
+}
+Scale.prototype.connect = async function(){
+  if(!navigator.bluetooth) throw new Error("no-webbluetooth");
+  this.onState("scanning");
+  this.dev = await navigator.bluetooth.requestDevice({
+    filters:[{services:[SVC]}], optionalServices:[SVC]
+  });
+  this.dev.addEventListener("gattserverdisconnected", function(){ this.onState("lost"); }.bind(this));
+  this.onState("connecting");
+  var server = await this.dev.gatt.connect();
+  var svc = await server.getPrimaryService(SVC);
+  var rx = await svc.getCharacteristic(UPLINK);
+  this.tx = await svc.getCharacteristic(DOWNLINK);
+  rx.addEventListener("characteristicvaluechanged", this._onNotify.bind(this));
+  await rx.startNotifications();
+  await this.send(CMD.unitGram());
+  await this.send(CMD.battery());
+  this.onState("ready");
+};
+Scale.prototype.send = async function(bytes){
+  if(!this.tx) return;
+  try{
+    if(this.tx.writeValueWithoutResponse) await this.tx.writeValueWithoutResponse(bytes);
+    else await this.tx.writeValue(bytes);
+  }catch(e){}
+};
+Scale.prototype.tare   = function(){ return this.send(CMD.tare()); };
+Scale.prototype.start  = async function(){ await this.send(CMD.timerReset()); await this.send(CMD.timerStart()); };
+Scale.prototype.pause  = function(){ return this.send(CMD.timerPause()); };
+Scale.prototype.reset  = function(){ return this.send(CMD.timerReset()); };
+Scale.prototype.disconnect = function(){ try{ this.dev && this.dev.gatt.disconnect(); }catch(e){} };
+
+/* reassemble: notifications can fragment or abut. notify frames carry no CRC
+   (firmware leaves the tail 00 00), so trust header + length only. */
+Scale.prototype._onNotify = function(ev){
+  var v = ev.target.value;
+  for(var i=0;i<v.byteLength;i++) this.buf.push(v.getUint8(i));
+  while(true){
+    while(this.buf.length >= 2 && !(this.buf[0] === 0xA5 && this.buf[1] === 0x5A)) this.buf.shift();
+    if(this.buf.length < 6) return;
+    var len = (this.buf[4] << 8) | this.buf[5];
+    var total = 6 + len + 2;
+    if(len > 64){ this.buf.shift(); continue; }
+    if(this.buf.length < total) return;
+    this._frame(this.buf.slice(0,total));
+    this.buf = this.buf.slice(total);
+  }
+};
+Scale.prototype._frame = function(f){
+  var op = f[2], cmd = f[3], p = f.slice(6);
+  if(op === 0x01 && cmd === 0x01 && p.length >= 9){
+    var dv = new DataView(new Uint8Array(p).buffer);
+    this.onData({
+      weight: dv.getInt32(0,false) / 10,      // tenths of a gram
+      flow:   dv.getInt16(4,false) / 10,      // 100 mg/s -> g/s
+      timer:  dv.getUint16(6,false),          // seconds
+      over:   p[8] === 1
+    });
+  } else if(cmd === 0x05 && p.length >= 2){
+    this.onState("battery:" + p[1]);
+  }
+};
+
+/* ---------- recipes: [atSeconds, cumulativeGrams, note] ---------- */
+var RECIPES = [
+  { id:"ken-hot", name:"V60 — my daily", by:"Kenneth", dose:15, water:225, temp:"94 °C", grind:"just under 80 · DF54", drawdown:210,
+    desc:"Five pours, 45s apart, swirl at the fourth.",
+    steps:[[0,30,"Bloom — saturate the whole bed"],[40,90,""],[80,135,""],[110,180,"Swirl"],[150,225,"Let it draw down"]],
+    foot:"<p>With the Dot connected the clock comes from the scale, and each pour ends when you hit the number — not when the timer says so.</p>" },
+  { id:"ken-ice", name:"V60 — iced", by:"Kenneth", dose:15, water:135, temp:"94 °C", grind:"around 70 · DF54", drawdown:180, ice:90,
+    desc:"Brew hot onto 90 g of ice in the server.",
+    steps:[[0,25,"Bloom onto the ice-filled server"],[40,54,""],[70,81,""],[95,108,"Swirl"],[120,135,"Let it draw down"]],
+    foot:"<p>Tare with the brewer AND the iced server on the scale, so the targets stay hot-water only.</p>" },
+  { id:"med16", name:"V60 — medium roast 1:16", by:"Kenneth", dose:15, water:240, temp:"94 °C", grind:"78–80 · DF54", drawdown:210,
+    desc:"Your cadence opened up to 1:16, with a 3x bloom.",
+    steps:[[0,45,"Bloom 3x dose"],[40,95,""],[80,145,""],[110,195,"Swirl"],[150,240,"Let it draw down"]],
+    foot:"<p>If it tastes hollow rather than clear, drop to 225 g before touching the grind.</p>" },
+  { id:"hoffmann", name:"The Ultimate V60", by:"James Hoffmann", dose:30, water:500, temp:"boiling", grind:"medium-fine", drawdown:210,
+    desc:"2x bloom with a swirl, then two pours split 60/40.",
+    steps:[[0,60,"Bloom — swirl until fully wet"],[45,300,"Steady circles"],[75,500,"Slower, toward the centre"],[105,500,"Stir each way, then swirl"]],
+    foot:"<p>1:16.7. Aim to finish drawdown around 3:30.</p>" },
+  { id:"46", name:"The 4:6 Method", by:"Tetsu Kasuya", dose:20, water:300, temp:"92 °C", grind:"coarse-medium", drawdown:210,
+    desc:"First 40% sets sweetness, last 60% sets strength.",
+    steps:[[0,60,"40% block — more here = sweeter"],[45,120,"Second of the 40%"],[90,180,"60% block — sets strength"],[130,240,""],[165,300,"Final pour"]],
+    foot:"<p>1:15. Too sharp? Bigger pour 1, smaller pour 2.</p>" },
+  { id:"rao", name:"Bloom, swirl, one pour", by:"Scott Rao", dose:22, water:360, temp:"96 °C", grind:"medium-fine", drawdown:210,
+    desc:"Hard bloom, aggressive swirl, one continuous pour.",
+    steps:[[0,66,"Bloom 3x dose — swirl hard"],[45,360,"One continuous pour"],[105,360,"Spin the brewer"]],
+    foot:"<p>1:16.4. The pour is unbroken from 0:45 to about 1:45.</p>" },
+  { id:"onyx", name:"V60 — four pours", by:"Onyx Coffee Lab", dose:22, water:352, temp:"96 °C", grind:"medium", drawdown:210,
+    desc:"Even four-pour cadence, easy to repeat.",
+    steps:[[0,60,"Bloom"],[45,150,""],[75,250,""],[105,352,"Let it draw down"]],
+    foot:"<p>1:16. Total around 3:00–3:30.</p>" }
+];
+
+/* ---------- state ---------- */
+var cur = RECIPES[0], doses = {}, log = [], taste = null;
+var clk = 0, running = false, ticker = null, t0 = 0;        // clock fallback
+var weight = 0, flow = 0, batt = null, linked = false;
+var hits = {}, cued = {}, lastKind = "", scale = null;
+
+var $ = function(id){ return document.getElementById(id); };
+var mmss = function(s){ return Math.floor(s/60)+":"+String(Math.floor(s)%60).padStart(2,"0"); };
+var dose = function(){ return doses[cur.id] || cur.dose; };
+var sc = function(g){ return Math.round(g * dose() / cur.dose); };
+
+try{ var sp = localStorage.getItem("brew:prefs"); if(sp){ var v = JSON.parse(sp);
+  doses = v.doses||{}; var r = RECIPES.filter(function(x){return x.id===v.id;})[0]; if(r) cur = r; } }catch(e){}
+try{ var sl = localStorage.getItem("brew:log"); if(sl) log = JSON.parse(sl)||[]; }catch(e){}
+function savePrefs(){ try{ localStorage.setItem("brew:prefs", JSON.stringify({id:cur.id,doses:doses})); }catch(e){} }
+function saveLog(){ try{ localStorage.setItem("brew:log", JSON.stringify(log.slice(0,60))); }catch(e){} }
+
+/* ---------- cues ---------- */
+var ac = null;
+function beep(f,ms,vol){ try{
+  if(!ac) ac = new (window.AudioContext||window.webkitAudioContext)();
+  if(ac.state === "suspended") ac.resume();
+  var o=ac.createOscillator(), g=ac.createGain(); o.connect(g); g.connect(ac.destination);
+  o.type="sine"; o.frequency.value=f;
+  g.gain.setValueAtTime(.0001,ac.currentTime);
+  g.gain.exponentialRampToValueAtTime(vol||.25,ac.currentTime+.01);
+  g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+ms/1000);
+  o.start(); o.stop(ac.currentTime+ms/1000+.02);
+}catch(e){} }
+function buzz(p){ try{ navigator.vibrate && navigator.vibrate(p); }catch(e){} }
+function anim(el,c){ el.classList.remove("tick","urge"); void el.offsetWidth; el.classList.add(c); }
+
+/* ---------- scale ---------- */
+function onState(s){
+  if(s.indexOf("battery:") === 0){ batt = +s.split(":")[1]; $("lB").textContent = batt+"%"; return; }
+  var d = $("cDot"), l = $("cLab"), b = $("cBtn");
+  if(s === "ready"){ linked = true; d.className = "dot live"; l.textContent = "Dot connected — pours end on weight"; b.textContent = "Disconnect"; }
+  else if(s === "scanning"){ l.textContent = "Looking for the Dot…"; }
+  else if(s === "connecting"){ l.textContent = "Connecting…"; }
+  else { linked = false; d.className = "dot"; b.textContent = "Connect";
+         l.textContent = s === "lost" ? "Scale dropped — back on the clock" : "Scale not connected — running on the clock"; }
+  paint();
+}
+function onData(d){
+  weight = d.weight; flow = d.flow;
+  if(running && d.timer > 0) clk = d.timer;
+  $("lW").textContent = d.weight.toFixed(1)+" g";
+  $("lF").innerHTML = '<span class="'+(d.flow>9?"warn":"")+'">'+d.flow.toFixed(1)+" g/s</span>";
+  paint();
+}
+$("cBtn").onclick = async function(){
+  if(linked){ scale.disconnect(); onState("idle"); return; }
+  if(!navigator.bluetooth){
+    $("cLab").textContent = "This browser has no Bluetooth. Open in Bluefy.";
+    return;
+  }
+  scale = scale || new Scale(onData, onState);
+  try{ await scale.connect(); }
+  catch(e){ onState("idle"); $("cLab").textContent = "Couldn't connect — wake the Dot and retry"; }
+};
+
+/* ---------- phase: weight-driven when linked, time-driven when not ---------- */
+function phase(){
+  var S = cur.steps, i = -1;
+  for(var k=0;k<S.length;k++){ if(clk >= S[k][0]) i = k; }
+  if(!running || i < 0) return {kind:"pre"};
+  var target = sc(S[i][1]), nxt = (i+1 < S.length) ? S[i+1] : null;
+  if(linked){
+    var left = target - weight;
+    if(left > 0.4) return {kind:"pour", i:i, step:S[i], target:target, left:left, nxt:nxt};
+    if(nxt) return {kind:"hold", i:i, step:S[i], target:target, nxt:nxt, over:weight-target};
+    return {kind:"draw", i:i, step:S[i], target:target, over:weight-target};
+  }
+  var prev = i > 0 ? sc(S[i-1][1]) : 0, dur = Math.min(14, Math.max(5,(target-prev)/8));
+  if(clk - S[i][0] < dur) return {kind:"pour", i:i, step:S[i], target:target, nxt:nxt};
+  if(nxt) return {kind:"hold", i:i, step:S[i], target:target, nxt:nxt};
+  return {kind:"draw", i:i, step:S[i], target:target};
+}
+
+function paint(){
+  var f = phase(), st = $("stage"), big = $("big");
+  $("clock").textContent = mmss(clk);
+  var n = cur.steps.length, g = "";
+  for(var k=0;k<n;k++) g += '<i class="'+(f.i >= k && running ? "on" : "")+'"></i>';
+  $("gauge").innerHTML = g;
+
+  if(f.kind === "pre"){
+    st.className = "stage"; $("cue").textContent = linked ? "Ready — tare first" : "Ready";
+    big.innerHTML = sc(cur.steps[0][1])+'<em>g</em>';
+    $("sub").textContent = linked ? "Brewer and dry coffee on the scale, tare, then start." : "Bloom starts the moment you hit start.";
+    $("of").textContent = "";
+  } else if(f.kind === "pour"){
+    if(linked){
+      var near = f.left <= 5;
+      st.className = near && f.left <= 1.2 ? "stage stop" : "stage pour";
+      $("cue").textContent = near ? "Ease off — left" : "Pour — left";
+      big.innerHTML = f.left.toFixed(f.left < 10 ? 1 : 0)+'<em>g</em>';
+      $("sub").textContent = (f.step[2] || "Steady circles.") + " · to " + f.target + " g";
+      if(near) anim(big,"urge");
+    } else {
+      st.className = "stage pour"; $("cue").textContent = "Pour now — to";
+      big.innerHTML = f.target+'<em>g</em>';
+      $("sub").textContent = f.step[2] || "Steady circles. Keep the bed level.";
+    }
+    $("of").textContent = "pour "+(f.i+1)+" of "+n;
+  } else if(f.kind === "hold"){
+    var left = f.nxt[0] - clk;
+    var over = linked ? f.over : 0;
+    st.className = over > 2 ? "stage stop" : "stage";
+    $("cue").textContent = over > 2 ? "Stop — over by "+over.toFixed(1)+" g" : "Hold";
+    big.innerHTML = Math.max(0,left)+'<em>s</em>';
+    $("sub").textContent = "Next: "+sc(f.nxt[1])+" g"+(f.nxt[2] ? " — "+f.nxt[2].toLowerCase() : "");
+    $("of").textContent = "next pour at "+mmss(f.nxt[0]);
+    if(running) anim(big, left <= 3 ? "urge" : "tick");
+  } else {
+    st.className = "stage"; $("cue").textContent = "Drawdown";
+    big.innerHTML = (linked ? weight.toFixed(0) : f.target)+'<em>g</em>';
+    $("sub").textContent = clk >= cur.drawdown ? "Should be done. Taste it, then log it." : "Leave it alone. Target "+mmss(cur.drawdown)+".";
+    $("of").textContent = "total "+mmss(cur.drawdown);
+  }
+  if(f.kind === "pour" && lastKind !== "pour" && !linked) anim(big,"tick");
+  lastKind = f.kind;
+
+  [].slice.call(document.querySelectorAll(".step")).forEach(function(el,i){
+    el.className = "step"+(i === f.i && running ? " now" : "")+(i < f.i ? " done" : "");
+    var h = el.querySelector(".hit");
+    if(h) h.textContent = hits[i] != null ? (hits[i] > 0 ? "+" : "") + hits[i].toFixed(1) + " g" : "";
+  });
+  cues(f);
+}
+
+function cues(f){
+  if(!running) return;
+  var key = f.kind + ":" + f.i;
+  if(linked && f.kind === "pour"){
+    if(f.left <= 5 && !cued["near"+f.i]){ cued["near"+f.i] = 1; beep(660,110); buzz(30); }
+  }
+  if(f.kind === "hold" || f.kind === "draw"){
+    if(!cued["hit"+f.i]){ cued["hit"+f.i] = 1;
+      if(linked){ hits[f.i] = weight - f.target; beep(880,200); buzz([70,50,70]); }
+    }
+    if(f.nxt){
+      var left = f.nxt[0] - clk;
+      if(left === 3 && !cued["pre"+f.nxt[0]]){ cued["pre"+f.nxt[0]] = 1; beep(660,110); }
+      if(left <= 0 && !cued["go"+f.nxt[0]]){ cued["go"+f.nxt[0]] = 1; beep(880,180); buzz([60,60,60]); }
+    }
+  }
+  if(clk >= cur.drawdown && !cued.done){ cued.done = 1; beep(520,320); buzz(200); $("saveBox").className = "save"; }
+}
+
+/* ---------- clock (fallback + render pump) ---------- */
+function loop(){
+  if(!running) return;
+  if(!linked) clk = Math.floor((Date.now() - t0)/1000);
+  paint();
+}
+$("run").onclick = async function(){
+  if(running){
+    running = false; clearInterval(ticker); $("run").textContent = "Resume"; $("run").className = "go on";
+    if(linked) await scale.pause();
+    if(!linked) t0 = Date.now() - clk*1000;
+    return;
+  }
+  running = true; beep(880,150); buzz(50);
+  if(linked){ await scale.tare(); await scale.start(); clk = 0; }
+  else { t0 = Date.now() - clk*1000; }
+  ticker = setInterval(loop, 250);
+  $("run").textContent = "Pause"; $("run").className = "go on";
+  try{ if("wakeLock" in navigator) navigator.wakeLock.request("screen"); }catch(e){}
+  paint();
+};
+$("tare").onclick = function(){ if(linked){ scale.tare(); beep(740,90); buzz(20); } };
+$("reset").onclick = function(){
+  running = false; clearInterval(ticker); clk = 0; weight = 0; hits = {}; cued = {}; lastKind = "";
+  if(linked) scale.reset();
+  $("run").textContent = "Start"; $("run").className = "go";
+  $("saveBox").className = "save hide"; $("verdict").className = "verdict hide"; taste = null;
+  [].slice.call(document.querySelectorAll(".taste button")).forEach(function(b){ b.setAttribute("aria-pressed","false"); });
+  paint();
+};
+document.addEventListener("click", function(e){
+  var b = e.target.closest && e.target.closest("#dUp,#dDn");
+  if(!b) return;
+  var d = dose() + (b.id === "dUp" ? 1 : -1);
+  if(d < 8 || d > 40) return;
+  doses[cur.id] = d; renderStatic(); savePrefs(); buzz(15);
+});
+
+/* ---------- render ---------- */
+function renderStatic(){
+  $("rName").textContent = cur.name; $("rBy").textContent = cur.by;
+  $("dVal").textContent = dose()+" g";
+  $("steps").innerHTML = cur.steps.map(function(s){
+    return '<li class="step"><span class="t">'+mmss(s[0])+'</span><span class="n">'+(s[2]||"Pour")+
+      '</span><span class="g">'+sc(s[1])+'<em> g</em><span class="hit"></span></span></li>'; }).join("");
+  $("foot").innerHTML = cur.foot+'<p>'+dose()+' g · '+sc(cur.water)+' g · 1:'+(cur.water/cur.dose).toFixed(1)+
+    ' · '+cur.temp+' · grind '+cur.grind+'</p>';
+  paint();
+}
+function renderList(){
+  $("pList").innerHTML = '<div class="sec">Mine</div>'+cards(RECIPES.slice(0,3))+
+    '<div class="sec">Published methods</div>'+cards(RECIPES.slice(3));
+  [].slice.call($("pList").querySelectorAll(".card")).forEach(function(b){
+    b.onclick = function(){ cur = RECIPES.filter(function(r){return r.id===b.dataset.id;})[0];
+      $("reset").click(); renderStatic(); savePrefs(); tab("brew"); };
+  });
+}
+function cards(list){
+  return list.map(function(r){ var d = doses[r.id];
+    return '<button class="card'+(r.id===cur.id?" on":"")+'" data-id="'+r.id+'"><h3>'+r.name+'</h3>'+
+      '<div class="by">'+r.by+'</div><div class="meta">'+(d?d+' g (yours)':r.dose+' g')+' · 1:'+
+      (r.water/r.dose).toFixed(1)+' · '+r.temp+' · '+r.grind+'</div><div class="desc">'+r.desc+'</div></button>';
+  }).join("");
+}
+[].slice.call(document.querySelectorAll(".taste button")).forEach(function(b){
+  b.onclick = function(){ taste = b.dataset.v;
+    [].slice.call(document.querySelectorAll(".taste button")).forEach(function(x){ x.setAttribute("aria-pressed", String(x===b)); });
+    var v = $("verdict");
+    v.textContent = taste === "sour" ? "Under-extracted. Go 2–3 clicks finer."
+      : taste === "bitter" ? "Over-extracted. Go 2–3 clicks coarser." : "Keep this grind.";
+    v.className = "verdict";
+  };
+});
+$("saveBtn").onclick = function(){
+  if(!taste){ $("verdict").textContent = "Pick how it tasted first."; $("verdict").className = "verdict"; return; }
+  var ov = Object.keys(hits).map(function(k){ return Math.abs(hits[k]); });
+  log.unshift({ d:Date.now(), r:cur.name, dose:dose(), water:sc(cur.water), t:taste, total:mmss(clk),
+    acc: ov.length ? Math.max.apply(null, ov) : null });
+  saveLog(); $("saveBox").className = "save hide"; renderLog(); tab("log");
+};
+function renderLog(){
+  if(!log.length){ $("logList").innerHTML = '<li class="empty">Nothing logged yet.</li>'; $("logFoot").textContent = ""; return; }
+  var TL = {sour:"sour / thin", good:"balanced", bitter:"bitter / heavy"};
+  $("logList").innerHTML = log.map(function(e,i){ var d = new Date(e.d);
+    return '<li><div><div class="lt">'+e.r+' · '+(TL[e.t]||e.t)+'</div><div class="ls">'+
+      d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+' · '+e.dose+' g / '+e.water+' g · '+e.total+
+      (e.acc != null ? ' · worst pour off by '+e.acc.toFixed(1)+' g' : '')+'</div></div>'+
+      '<button class="del" data-i="'+i+'">×</button></li>'; }).join("");
+  [].slice.call($("logList").querySelectorAll(".del")).forEach(function(b){
+    b.onclick = function(){ log.splice(+b.dataset.i,1); saveLog(); renderLog(); }; });
+  var acc = log.filter(function(e){ return e.acc != null; });
+  $logFootText(acc);
+}
+function $logFootText(acc){
+  if(acc.length >= 2){
+    var avg = acc.reduce(function(a,e){ return a+e.acc; },0)/acc.length;
+    $("logFoot").textContent = "Across "+acc.length+" measured brews your worst pour is off by "+avg.toFixed(1)+" g on average.";
+  } else { $("logFoot").textContent = log.length+" logged."; }
+}
+function tab(w){
+  $("pBrew").className = w==="brew" ? "" : "hide";
+  $("pList").className = w==="list" ? "" : "hide";
+  $("pLog").className  = w==="log"  ? "" : "hide";
+  $("actionBar").className = w==="brew" ? "bar" : "bar hide";
+  $("tBrew").setAttribute("aria-selected", w==="brew");
+  $("tList").setAttribute("aria-selected", w==="list");
+  $("tLog").setAttribute("aria-selected", w==="log");
+  document.body.style.paddingBottom = (w==="brew" ? "150px" : "84px");
+  if(w==="list") renderList();
+  if(w==="log") renderLog();
+  window.scrollTo(0,0);
+}
+$("tBrew").onclick=function(){tab("brew");}; $("tList").onclick=function(){tab("list");}; $("tLog").onclick=function(){tab("log");};
+document.addEventListener("visibilitychange", function(){ if(!document.hidden && running && !linked) loop(); });
+renderStatic(); renderLog();
+</script>
+</body></html>
