@@ -56,13 +56,24 @@
   .sub2{font-size:14px;color:var(--mute);min-height:19px;line-height:1.35;margin-top:8px}
 
   /* pour progress toward the current target */
-  .track{height:3px;background:#242428;border-radius:2px;overflow:hidden;margin:18px 0 0}
-  .track i{display:block;height:100%;width:0;background:var(--hot);border-radius:2px;transition:width 80ms linear;will-change:width}
+  .tracklab{display:flex;align-items:baseline;justify-content:space-between;margin:20px 0 7px}
+  .tracklab b{font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--mute);font-weight:600}
+  .tracklab span{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+  .stage.pour .tracklab b,.stage.pour .tracklab span{color:#C9A389}
+  .stage.stop .tracklab b,.stage.stop .tracklab span{color:#E8A49C}
+  .track{height:10px;background:#242428;border-radius:6px;overflow:hidden;margin:0;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+  .track i{display:block;height:100%;width:0;background:var(--hot);border-radius:6px;
+    transition:width 80ms linear;will-change:width}
   .stage.stop .track i{background:var(--over)}
 
   /* step pips */
-  .gauge{display:flex;gap:4px;margin-top:10px;height:3px}
-  .gauge i{flex:1;background:#242428;border-radius:2px;transition:background 200ms}
+  .gaugelab{font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--mute);
+    font-weight:600;margin:16px 0 6px}
+  .stage.pour .gaugelab{color:#C9A389}
+  .stage.stop .gaugelab{color:#E8A49C}
+  .gauge{display:flex;gap:4px;margin-top:0;height:5px}
+  .gauge i{flex:1;background:#242428;border-radius:3px;transition:background 200ms}
   .gauge i.on{background:#55555C}
 
   .clockrow{display:flex;align-items:baseline;justify-content:space-between;margin-top:16px}
@@ -227,7 +238,9 @@
       <div class="cue" id="cue">Ready</div>
       <div class="target" id="big" aria-live="polite">0<em>g</em></div>
       <div class="sub2" id="sub">Tare with the brewer on, then start.</div>
+      <div class="tracklab"><b id="trackName">This pour</b><span id="trackVal"></span></div>
       <div class="track"><i id="fill"></i></div>
+      <div class="gaugelab" id="gaugeLab">Recipe</div>
       <div class="gauge" id="gauge"></div>
       <div class="clockrow"><span class="clock" id="clock">0:00</span><span class="of" id="of"></span></div>
     </div>
@@ -676,6 +689,21 @@ function paint(){
   }
   var pct = (Math.max(0, Math.min(1, fw)) * 100).toFixed(1) + "%";
   if(prev.fill !== pct){ prev.fill = pct; el("fill").style.width = pct; }
+
+  /* say what the bar is measuring — it is this pour, not the whole brew */
+  if(!running || f.i < 0){
+    setText("trackName", "This pour");
+    setText("trackVal", linked ? "waiting" : "not started");
+  } else {
+    var from = f.i > 0 ? sc(cur.steps[f.i-1][1]) : 0;
+    setText("trackName", "Pour " + (f.i+1) + " of " + n);
+    setText("trackVal", linked
+      ? Math.max(from, Math.round(weight)) + " → " + f.target + " g"
+      : from + " → " + f.target + " g");
+  }
+  setText("gaugeLab", running && f.i >= 0
+    ? "Recipe · " + (f.i+1) + "/" + n + " pours done"
+    : "Recipe · " + n + " pours");
 
   var cls = "stage", cue, bigHTML, sub, of;
   if(f.kind === "pre"){
