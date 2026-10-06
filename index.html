@@ -233,7 +233,7 @@
   .wNav button{flex:1;padding:17px;border-radius:14px;font-size:16px;font-weight:600}
   .wNav .go{background:var(--hot);color:#0A0A0B}
   .wNav .gh{flex:0 0 110px;background:#18181B;border:1px solid var(--line);color:var(--ink);font-weight:500}
-  .wNav .gh:disabled{opacity:.3}
+
   .delR{width:100%;margin-top:14px;padding:15px;border-radius:13px;background:none;
     border:1px solid #3A2420;color:#E8766A;font-size:14px;font-weight:500;transition:background 200ms}
   .delR.armed{background:#FF3B30;border-color:#FF3B30;color:#fff;font-weight:600}
@@ -827,6 +827,14 @@ var RECIPES = [
     desc:"Hard bloom, aggressive swirl, one continuous pour.",
     steps:[[0,66,"Bloom 3x dose — swirl hard"],[45,360,"One continuous pour"],[105,360,"Spin the brewer"]],
     foot:"<p>1:16.4. The pour is unbroken from 0:45 to about 1:45.</p>" },
+  { id:"jh1cup", name:"Better 1-Cup V60", by:"James Hoffmann", dose:15, water:250, temp:"boiling", grind:"medium-fine", drawdown:180,
+    desc:"Hoffmann's small-dose method. Big 50 g bloom, then four short pours ten seconds apart — built so a single cup doesn't come out thin.",
+    steps:[[0,50,"Bloom — swirl at 0:10",15],[45,100,"40% of the water",15],[70,150,"",10],[90,200,"",10],[110,250,"Swirl, then leave it",10]],
+    foot:"<p>1:16.7. Each pour is about ten seconds with a ten-second pause after it — the pauses are the method, not slack.</p><p>Drawdown should land near 3:00.</p>" },
+  { id:"winton", name:"Five equal pours", by:"Matt Winton", dose:20, water:300, temp:"93 °C, cooling", grind:"medium-coarse", drawdown:230,
+    desc:"The 2021 World Brewers Cup winner. Five identical 60 g pours, each started as the bed runs dry. Easiest recipe to remember and to repeat.",
+    steps:[[0,60,"Bloom — pour from height to agitate",10],[40,120,"",10],[80,180,"",10],[120,240,"",10],[150,300,"Last 60 g, then leave it",10]],
+    foot:"<p>1:15. Every pour is the same 60 g, which is why this one is so easy to keep consistent.</p><p>Winton used two kettles — hotter for the bloom, cooler later. One kettle off its base between pours does much the same.</p><p>Pour when the bed runs dry rather than strictly on the clock; the times here are a guide.</p>" },
   { id:"onyx", name:"V60 — four pours", by:"Onyx Coffee Lab", dose:22, water:352, temp:"96 °C", grind:"medium", drawdown:210,
     desc:"Even four-pour cadence, easy to repeat.",
     steps:[[0,60,"Bloom"],[45,150,""],[75,250,""],[105,352,"Let it draw down"]],
@@ -1542,7 +1550,8 @@ function goto(n){
   if(wStep === 1 || wStep === 2) drawBasics();
   if(wStep === 3) drawSteps();
   if(wStep === 4) drawReview();
-  $("wBack").disabled = (wStep === 1);
+  /* nothing behind stage 1 — show no control rather than a dead one */
+  $("wBack").className = "gh" + (wStep === 1 ? " hide" : "");
   $("wNext").textContent = wStep === 4 ? "Save recipe" : "Next";
   setText("eTitle", editingId ? "Edit recipe" : "New recipe");
   window.scrollTo(0,0);
