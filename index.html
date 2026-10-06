@@ -294,8 +294,10 @@
   .eRowHead .when i{display:block;font-size:10.5px;font-style:normal;color:var(--mute);margin-top:1px}
   .eRow.open .eRowHead .when b{color:var(--hot)}
   .eRowHead .mid{min-width:0}
-  .eRowHead .nt{font-size:13.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .eRowHead .sub{font-size:11.5px;color:var(--mute);margin-top:2px}
+  .eRowHead .nt{display:block;font-size:13.5px;color:var(--ink);overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap}
+  .eRowHead .nt em{font-style:normal;color:var(--mute);margin-left:4px}
+  .eRowHead .sub{display:block;font-size:11.5px;color:var(--mute);margin-top:3px}
   .eRowHead .chev{font-size:17px;color:var(--mute);transition:transform 220ms;padding-right:4px}
   .eRow.open .chev{transform:rotate(90deg)}
 
@@ -326,6 +328,17 @@
     transition:transform 120ms,background 200ms}
   .eadd i{font-style:normal;font-size:20px;font-weight:400;line-height:1}
   .eadd:active{transform:scale(.985);background:#241A15}
+  .drawRow{display:flex;align-items:center;gap:12px;background:var(--card);
+    border:1px solid var(--line);border-radius:13px;padding:13px 13px 13px 0;margin-top:10px}
+  .drawRow .when{width:54px;flex:0 0 54px;text-align:center}
+  .drawRow .when b{display:block;font-size:14px;font-weight:600;color:var(--mute)}
+  .drawRow .mid{flex:1;min-width:0}
+  .drawRow .mid b{display:block;font-size:13.5px;font-weight:500}
+  .drawRow .mid span{display:block;font-size:11.5px;color:var(--mute);margin-top:3px;line-height:1.35}
+  .drawRow .grp{display:flex;align-items:center;gap:7px;padding-right:0}
+  .drawRow button{width:42px;height:42px;border-radius:11px;background:#1D1D21;
+    border:1px solid var(--line);font-size:19px;color:var(--ink)}
+  .drawRow .ro{width:52px;text-align:center;font-size:16px;font-weight:600}
   .ewarn{background:#1C0F0E;border:1px solid var(--over);border-radius:12px;padding:12px 14px;
     font-size:13px;color:#FF8E86;line-height:1.5;margin-top:10px}
   .ewarn button{color:var(--hot);font-weight:600;text-decoration:underline}
@@ -340,11 +353,40 @@
     border:1px solid var(--line);border-radius:100px;padding:6px 11px}
   .card{position:relative}
   .log{list-style:none}
-  .log li{display:grid;grid-template-columns:1fr auto;gap:10px;padding:13px 14px;margin-bottom:6px;
-    border-radius:12px;background:var(--card)}
-  .log .lt{font-size:14px;font-weight:600}
-  .log .ls{font-size:12px;color:var(--mute);margin-top:3px;line-height:1.4}
-  .log .del{color:var(--mute);font-size:20px;padding:0 6px;align-self:center}
+  .lgItem{border-radius:13px;background:var(--card);border:1px solid transparent;
+    margin-bottom:7px;overflow:hidden;transition:border-color 200ms}
+  .lgItem.open{border-color:var(--line)}
+  .lgHeadBtn{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:14px 13px}
+  .lgMain{flex:1;min-width:0}
+  .log .lt{display:block;font-size:14.5px;font-weight:600}
+  .log .ls{display:block;font-size:12px;color:var(--mute);margin-top:3px;line-height:1.4}
+  .lgTag{flex:0 0 auto;font-size:11px;padding:5px 10px;border-radius:100px;white-space:nowrap;
+    border:1px solid var(--line);color:var(--mute)}
+  .lgTag.good{border-color:rgba(52,199,89,.4);color:var(--ok)}
+  .lgTag.sour{border-color:rgba(255,106,31,.4);color:var(--hot)}
+  .lgTag.bitter{border-color:rgba(255,59,48,.4);color:#FF7A70}
+  .lgItem .chev{font-size:17px;color:var(--mute);transition:transform 220ms}
+  .lgItem.open .chev{transform:rotate(90deg)}
+
+  .lgBody{padding:2px 13px 14px;border-top:1px solid var(--line);margin-top:2px}
+  .lgFacts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 0 4px}
+  .lgFacts span{display:block;font-size:10.5px;color:var(--mute);letter-spacing:.05em;text-transform:uppercase}
+  .lgFacts b{display:block;font-size:16px;font-weight:600;margin-top:3px}
+  .lgHead{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--mute);
+    font-weight:600;margin:16px 0 6px}
+  .lgPours{list-style:none}
+  .lgPours li{display:flex;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid #1E1E22;font-size:13.5px}
+  .lgPours li:last-child{border-bottom:0}
+  .lgPours .lp{width:44px;flex:0 0 44px;font-weight:600;color:var(--mute)}
+  .lgPours .lg2{width:52px;flex:0 0 52px;font-weight:600}
+  .lgPours .ln{flex:1;font-size:12.5px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lgMiss{flex:0 0 auto;font-size:12.5px;font-weight:600}
+  .lgMiss.ok{color:var(--ok)} .lgMiss.mid{color:var(--hot)} .lgMiss.bad{color:#FF7A70}
+  .lgNo{flex:0 0 auto;font-size:12px;color:#55555C}
+  .lgMeta{font-size:12px;color:var(--mute);line-height:1.6;margin-top:14px;
+    padding-top:12px;border-top:1px solid var(--line)}
+  .lgDel{width:100%;margin-top:13px;padding:12px;border-radius:11px;background:none;
+    border:1px solid #3A2420;color:#E8766A;font-size:13px}
   .empty{font-size:13.5px;color:var(--mute);line-height:1.55;padding:14px;display:block;
     background:var(--card);border-radius:12px}
 
@@ -656,6 +698,7 @@
     <p class="wHelp" id="eTimeCap"></p>
     <ul class="esteps" id="eSteps"></ul>
     <button class="eadd" id="eAdd"><i>+</i>Add another pour</button>
+    <div class="drawRow" id="drawRow"></div>
     <div class="ewarn hide" id="eWarn"></div>
   </div>
 
@@ -1302,23 +1345,74 @@ function cards(list){
 });
 $("saveBtn").onclick = function(){
   if(!taste){ $("verdict").textContent = "Pick how it tasted first."; $("verdict").className = "verdict"; return; }
-  var ov = Object.keys(hits).map(function(k){ return Math.abs(hits[k]); });
-  log.unshift({ d:Date.now(), r:cur.name, dose:dose(), water:sc(cur.water), t:taste, total:mmss(clk),
-    acc: ov.length ? Math.max.apply(null, ov) : null });
+  var pours = cur.steps.map(function(s,i){
+    return { at:s[0], target:sc(s[1]), miss:(hits[i] != null ? +hits[i].toFixed(1) : null), note:s[2]||"" };
+  });
+  var ov = pours.filter(function(p){ return p.miss != null; }).map(function(p){ return Math.abs(p.miss); });
+  log.unshift({
+    d:Date.now(), r:cur.name, rid:cur.id, by:cur.by,
+    dose:dose(), water:sc(cur.water), temp:cur.temp, grind:cur.grind,
+    t:taste, total:mmss(clk), target:cur.drawdown,
+    end:(linked ? +weight.toFixed(1) : null), linked:linked,
+    pours:pours, acc:(ov.length ? Math.max.apply(null, ov) : null)
+  });
   saveLog(); $("saveBox").className = "save hide"; renderLog(); tab("log");
 };
+var openLog = -1;
 function renderLog(){
-  if(!log.length){ $("logList").innerHTML = '<li class="empty">Nothing logged yet.</li>'; $("logFoot").textContent = ""; return; }
+  if(!log.length){
+    $("logList").innerHTML = '<li class="empty">Nothing logged yet. Rate a brew when it finishes and it lands here with every pour you hit or missed.</li>';
+    $("logFoot").textContent = ""; return;
+  }
   var TL = {sour:"sour / thin", good:"balanced", bitter:"bitter / heavy"};
-  $("logList").innerHTML = log.map(function(e,i){ var d = new Date(e.d);
-    return '<li><div><div class="lt">'+e.r+' · '+(TL[e.t]||e.t)+'</div><div class="ls">'+
-      d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+' · '+e.dose+' g / '+e.water+' g · '+e.total+
-      (e.acc != null ? ' · worst pour off by '+e.acc.toFixed(1)+' g' : '')+'</div></div>'+
-      '<button class="del" data-i="'+i+'">×</button></li>'; }).join("");
-  [].slice.call($("logList").querySelectorAll(".del")).forEach(function(b){
-    b.onclick = function(){ log.splice(+b.dataset.i,1); saveLog(); renderLog(); }; });
-  var acc = log.filter(function(e){ return e.acc != null; });
-  $logFootText(acc);
+  $("logList").innerHTML = log.map(function(e,i){
+    var dt = new Date(e.d);
+    var when = dt.toLocaleDateString(undefined,{month:"short",day:"numeric"}) + " \u00b7 " +
+               dt.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+    var body = "";
+    if(i === openLog){
+      var facts = '<div class="lgFacts">'+
+        '<div><span>Dose</span><b>'+e.dose+' g</b></div>'+
+        '<div><span>Water</span><b>'+e.water+' g</b></div>'+
+        '<div><span>Ratio</span><b>1:'+(e.water/e.dose).toFixed(1)+'</b></div>'+
+        '<div><span>Time</span><b>'+e.total+'</b></div></div>';
+      var pours = "";
+      if(e.pours && e.pours.length){
+        pours = '<div class="lgHead">Every pour</div><ul class="lgPours">'+
+          e.pours.map(function(p,n){
+            var m = p.miss == null ? '<span class="lgNo">\u2014</span>'
+              : '<span class="lgMiss '+(Math.abs(p.miss) <= 1 ? "ok" : Math.abs(p.miss) <= 3 ? "mid" : "bad")+'">'+
+                (p.miss > 0 ? "+" : "")+p.miss.toFixed(1)+'</span>';
+            return '<li><span class="lp">'+mmss(p.at)+'</span><span class="lg2">'+p.target+' g</span>'+
+                   '<span class="ln">'+(p.note || "pour "+(n+1))+'</span>'+m+'</li>';
+          }).join("")+'</ul>';
+      }
+      var bits = [];
+      if(e.by) bits.push("Recipe by "+e.by);
+      if(e.grind) bits.push("Grind "+e.grind);
+      if(e.temp) bits.push(e.temp);
+      if(e.end != null) bits.push("Ended at "+e.end+" g");
+      if(e.target) bits.push("Drawdown target "+mmss(e.target));
+      if(e.linked === false) bits.push("No scale \u2014 timed only");
+      body = '<div class="lgBody">'+facts+pours+
+        '<div class="lgMeta">'+bits.join(" \u00b7 ")+'</div>'+
+        '<button class="lgDel" data-i="'+i+'">Delete this entry</button></div>';
+    }
+    return '<li class="lgItem'+(i===openLog?' open':'')+'">'+
+      '<button class="lgHeadBtn" data-i="'+i+'">'+
+        '<span class="lgMain"><span class="lt">'+e.r+'</span>'+
+        '<span class="ls">'+when+' \u00b7 '+e.dose+' g / '+e.water+' g \u00b7 '+e.total+'</span></span>'+
+        '<span class="lgTag '+e.t+'">'+(TL[e.t]||e.t)+'</span>'+
+        '<span class="chev">\u203a</span></button>'+body+'</li>';
+  }).join("");
+
+  [].slice.call($("logList").querySelectorAll(".lgHeadBtn")).forEach(function(b){
+    b.onclick = function(){ var i = +b.dataset.i; openLog = (openLog === i) ? -1 : i; renderLog(); };
+  });
+  [].slice.call($("logList").querySelectorAll(".lgDel")).forEach(function(b){
+    b.onclick = function(){ log.splice(+b.dataset.i,1); openLog = -1; saveLog(); renderLog(); };
+  });
+  $logFootText(log.filter(function(e){ return e.acc != null; }));
 }
 function $logFootText(acc){
   if(acc.length >= 2){
@@ -1373,11 +1467,17 @@ function blankDraft(from){
     var gap = inc.length > 2 ? (inc[2].at - inc[1].at) : 45;
     return { name:(from.custom ? from.name : from.name+" (mine)"), dose:from.dose,
              ratio:+(from.water/from.dose).toFixed(1), bloom2:(inc[0].add <= from.dose*2.4),
-             cad:gap, steps:inc, touched:true };
+             cad:gap, steps:inc, touched:true, draw:(from.drawdown||null), drawSet:!!from.drawdown };
   }
-  return { name:"", dose:15, ratio:15, bloom2:true, cad:45, pours:3, steps:null, touched:false };
+  return { name:"", dose:15, ratio:15, bloom2:true, cad:45, pours:3, steps:null, touched:false, draw:null, drawSet:false };
 }
 function total(){ return Math.round(ED.dose * ED.ratio); }
+/* drawdown follows the last pour unless the user pins it */
+function drawTarget(){
+  var l = ED.steps[ED.steps.length-1];
+  if(!ED.drawSet || !ED.draw) return l.at + l.dur + 45;
+  return Math.max(l.at + l.dur + 5, ED.draw);
+}
 
 /* regenerate from dose/ratio/pours/cadence. implicit — no button to press. */
 function rebuild(){
@@ -1426,7 +1526,7 @@ function drawBasics(){
 /* ---------------- stage 3 ---------------- */
 function drawSteps(){
   var tot = total(), last = ED.steps[ED.steps.length-1], run = 0;
-  setText("eTimeCap", ED.steps.length+" pours, "+tot+" g of water, done by "+mmss(last.at+last.dur)+".");
+  setText("eTimeCap", ED.steps.length+" pours, "+tot+" g of water, last pour ends "+mmss(last.at+last.dur)+".");
 
   $("eSteps").innerHTML = ED.steps.map(function(s,i){
     run += s.add;
@@ -1457,6 +1557,15 @@ function drawSteps(){
         (ED.steps.length > 1 ? '<button class="rmBtn" data-act="rm" data-i="'+i+'">Remove this pour</button>' : '')+
       '</div></li>';
   }).join("");
+
+  var dt = drawTarget();
+  $("drawRow").innerHTML =
+    '<span class="when"><b>'+mmss(dt)+'</b></span>'+
+    '<span class="mid"><b>Drawdown done</b><span>'+
+      (ED.drawSet ? 'you set this' : 'follows the last pour')+
+      ' \u2014 the app chimes here and logs the brew</span></span>'+
+    '<span class="grp"><button data-act="dw-">\u2212</button>'+
+      '<span class="ro">'+mmss(dt)+'</span><button data-act="dw+">+</button></span>';
 
   var w = [];
   for(var i=0;i<ED.steps.length;i++){
@@ -1491,7 +1600,7 @@ function drawReview(){
     '<div class="revFacts">'+
       '<div><span>Dose</span><b>'+ED.dose+' g</b></div>'+
       '<div><span>Water</span><b>'+run+' g</b></div>'+
-      '<div><span>Finishes</span><b>'+mmss(last.at+last.dur)+'</b></div>'+
+      '<div><span>Finishes</span><b>'+mmss(drawTarget())+'</b></div>'+
     '</div><ul class="revList">'+rows+'</ul>';
   $("w4").querySelectorAll(".delR").forEach && [].slice.call($("w4").querySelectorAll(".delR")).forEach(function(n){ n.remove(); });
   if(delHTML){ $("w4").insertAdjacentHTML("beforeend", delHTML); wireDelete(); }
@@ -1585,7 +1694,7 @@ function saveRecipe(){
     id: editingId || ("my-"+Date.now().toString(36)), custom:true,
     name: ED.name || "Untitled recipe", by:"Mine",
     dose: ED.dose, water: Math.round(run), temp:"94 °C", grind:"your setting",
-    drawdown: last.at + last.dur + 45,
+    drawdown: drawTarget(),
     desc: ED.steps.length+" pours, "+Math.round(run)+" g at 1:"+(run/ED.dose).toFixed(1)+".",
     steps: steps, foot:"<p>Your recipe. Edit it any time from the Recipes tab.</p>"
   };
@@ -1631,6 +1740,12 @@ document.addEventListener("click", function(ev){
   }
   var head = ev.target.closest && ev.target.closest(".eRowHead");
   if(head){ var i = +head.dataset.row; openStep = (openStep === i) ? -1 : i; drawSteps(); return; }
+  var dw = ev.target.closest && ev.target.closest(".drawRow button");
+  if(dw){
+    var cu = drawTarget();
+    ED.draw = cu + (dw.dataset.act === "dw+" ? 5 : -5);
+    ED.drawSet = true; drawSteps(); return;
+  }
   var b = ev.target.closest && ev.target.closest(".ctl button, .rmBtn");
   if(!b || !b.dataset.act) return;
   var j = +b.dataset.i, s = ED.steps[j], a = b.dataset.act;
