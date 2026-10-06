@@ -21,13 +21,23 @@
   .hide{display:none !important}
 
   /* status strip */
-  .conn{display:flex;align-items:center;gap:9px;padding:9px 2px;margin-bottom:6px}
-  .dot{width:7px;height:7px;border-radius:50%;background:#4A4A50;flex:0 0 7px;transition:background 300ms}
-  .dot.live{background:var(--ok);animation:pulse 2.4s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-  .conn .lab{flex:1;font-size:12.5px;color:var(--mute);letter-spacing:.04em;line-height:1.3}
-  .conn button{font-size:12.5px;padding:7px 13px;border:1px solid var(--line);border-radius:100px;color:var(--mute)}
-
+  .hdr{display:block}
+  .conn{display:flex;align-items:center;gap:13px;width:100%;text-align:left;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:13px 14px;margin:4px 0 14px;transition:border-color 220ms,background 220ms}
+  .conn:active{transform:scale(.995)}
+  .conn.on{border-color:rgba(52,199,89,.35);background:#101512}
+  .connDot{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:#4A4A50;
+    box-shadow:0 0 0 4px rgba(255,255,255,.03);transition:background 300ms,box-shadow 300ms}
+  .conn.on .connDot{background:var(--ok);box-shadow:0 0 0 4px rgba(52,199,89,.14);animation:pulse 2.4s infinite}
+  .conn.busy .connDot{background:var(--hot);animation:pulse 1s infinite}
+  .connTxt{flex:1;min-width:0}
+  .connTxt b{display:block;font-size:14px;font-weight:600;line-height:1.25}
+  .connTxt i{display:block;font-size:12px;font-style:normal;color:var(--mute);margin-top:2px;
+    line-height:1.35;overflow:hidden;text-overflow:ellipsis}
+  .connAct{flex:0 0 auto;font-size:13px;font-weight:600;color:#0A0A0B;background:var(--hot);
+    border-radius:100px;padding:9px 16px;transition:background 220ms,color 220ms}
+  .conn.on .connAct{background:none;color:var(--mute);font-weight:400;border:1px solid var(--line)}
   .top{display:flex;align-items:baseline;justify-content:space-between;padding:2px 2px 14px;gap:12px}
   .top h1{font-size:14px;font-weight:600;letter-spacing:.01em}
   .top .r{font-size:12.5px;color:var(--mute);white-space:nowrap}
@@ -43,6 +53,37 @@
   .stage.stop .flood{opacity:1;background:radial-gradient(120% 90% at 50% 0%,rgba(255,59,48,.3),transparent 70%)}
   .inner{position:relative;z-index:1;padding:20px 20px 18px}
 
+  /* brewer: every moving part is bound to a real number — server level is
+     cumulative weight, stream runs only during a pour, drip during drawdown */
+  .viz{position:absolute;right:16px;top:18px;width:104px;height:auto;
+    pointer-events:none;opacity:.95;z-index:0}
+  .cue,.target,.sub2{padding-right:118px}
+  .vCone,.vSrv{fill:none;stroke:#3A3A42;stroke-width:2.4;stroke-linejoin:round;transition:stroke 260ms}
+  .stage.pour .vCone,.stage.pour .vSrv{stroke:#6A4A36}
+  .stage.stop .vCone,.stage.stop .vSrv{stroke:#6E322A}
+  .vBed{fill:#2A2024}
+  .vSlurry{fill:var(--hot);opacity:.55;transition:y 200ms linear,height 200ms linear}
+  .vFill{fill:var(--hot);transition:y 260ms cubic-bezier(.4,0,.2,1),height 260ms cubic-bezier(.4,0,.2,1)}
+  .stage.stop .vFill,.stage.stop .vSlurry{fill:var(--over)}
+
+  .vStream{stroke:var(--hot);stroke-width:3.2;stroke-linecap:round;opacity:0;
+    stroke-dasharray:5 7;transition:opacity 200ms}
+  .stage.pour .vStream{opacity:.9;animation:pourRun .45s linear infinite}
+  @keyframes pourRun{to{stroke-dashoffset:-12}}
+
+  .vDrip{fill:var(--hot);opacity:0}
+  .stage.draw .vDrip{animation:drip 1.5s ease-in infinite}
+  @keyframes drip{
+    0%{opacity:0;transform:translateY(0) scale(.6)}
+    18%{opacity:.9;transform:translateY(0) scale(1)}
+    75%{opacity:.9;transform:translateY(14px) scale(.85)}
+    100%{opacity:0;transform:translateY(16px) scale(.6)}
+  }
+
+  @media (max-width:360px){
+    .viz{width:82px;right:12px}
+    .cue,.target,.sub2{padding-right:92px}
+  }
   .cue{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);transition:color 260ms}
   .stage.pour .cue{color:var(--hot)}
   .stage.stop .cue{color:var(--over)}
@@ -86,10 +127,10 @@
   .urge{animation:urge 400ms cubic-bezier(.2,.9,.3,1)}
 
   /* live readouts */
-  .live{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 18px}
-  .live div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
-  .live dt{font-size:11px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}
-  .live dd{font-size:19px;font-weight:600;margin-top:3px}
+  .live{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:11px 0 18px}
+  .live div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px 16px}
+  .live dt{font-size:11px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase}
+  .live dd{font-size:34px;font-weight:600;margin-top:5px;letter-spacing:-.03em;line-height:1}
   .live dd .warn{color:var(--over)}
 
   /* controls */
@@ -155,6 +196,62 @@
   .scaleBtns .sghost{background:#18181B;border:1px solid var(--line);color:var(--ink);font-weight:500}
   .scaleBtns button:disabled{opacity:.35}
   .scaleHint{font-size:12.5px;color:var(--mute);line-height:1.5;margin-top:18px}
+  .wSteps{list-style:none;display:flex;gap:6px;margin:0 0 22px;padding:0}
+  .wSteps li{flex:1;display:flex;align-items:center;gap:7px;padding-top:10px;
+    border-top:2px solid var(--line);transition:border-color 260ms}
+  .wSteps li i{width:19px;height:19px;flex:0 0 19px;border-radius:50%;background:#26262B;color:var(--mute);
+    font-size:10.5px;font-style:normal;font-weight:600;display:flex;align-items:center;justify-content:center}
+  .wSteps li span{font-size:11px;color:var(--mute);letter-spacing:.03em}
+  .wSteps li.on{border-color:var(--hot)}
+  .wSteps li.on i{background:var(--hot);color:#0A0A0B}
+  .wSteps li.on span{color:var(--ink);font-weight:600}
+  .wSteps li.did i{background:#3A3A42;color:var(--ink)}
+
+  .wQ{font-size:21px;font-weight:600;letter-spacing:-.02em;margin:0 0 6px}
+  .wHelp{font-size:13.5px;color:var(--mute);line-height:1.5;margin:0 0 20px}
+  .ctl.big{background:var(--card);border:1px solid var(--line);border-radius:13px;
+    padding:13px 14px;margin-bottom:9px;border-bottom:1px solid var(--line)}
+  .ctl.big .lab b{font-size:15px}
+  .pill{padding:11px 17px !important;width:auto !important;height:auto !important;
+    border-radius:100px !important;font-size:13.5px !important;font-weight:600}
+  .wOut{background:#16120F;border:1px solid rgba(255,106,31,.35);border-radius:13px;
+    padding:16px;margin-top:4px;display:flex;align-items:baseline;gap:9px}
+  .wOut b{font-size:30px;font-weight:600;color:var(--hot);letter-spacing:-.025em}
+  .wOut span{font-size:13px;color:var(--mute)}
+  .wPrev{background:var(--card);border:1px solid var(--line);border-radius:13px;
+    padding:14px 15px;margin-top:14px}
+  .pvHead{font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--mute);
+    font-weight:600;padding-bottom:10px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+  .pvRow{display:flex;align-items:baseline;gap:10px;padding:8px 0;font-size:14px}
+  .pvRow .pt{width:44px;flex:0 0 44px;font-weight:600;color:var(--mute)}
+  .pvRow .pa{width:58px;flex:0 0 58px;font-weight:600;color:var(--hot)}
+  .pvRow .pc{width:62px;flex:0 0 62px;color:var(--ink)}
+  .pvRow .pn{flex:1;font-size:12px;color:var(--mute);text-align:right}
+  .pvFoot{font-size:11.5px;color:var(--mute);line-height:1.45;padding-top:10px;margin-top:4px;
+    border-top:1px solid var(--line)}
+  .wNav{display:flex;gap:9px;margin:26px 0 10px}
+  .wNav button{flex:1;padding:17px;border-radius:14px;font-size:16px;font-weight:600}
+  .wNav .go{background:var(--hot);color:#0A0A0B}
+  .wNav .gh{flex:0 0 110px;background:#18181B;border:1px solid var(--line);color:var(--ink);font-weight:500}
+  .wNav .gh:disabled{opacity:.3}
+  .delR{width:100%;margin-top:14px;padding:15px;border-radius:13px;background:none;
+    border:1px solid #3A2420;color:#E8766A;font-size:14px;font-weight:500;transition:background 200ms}
+  .delR.armed{background:#FF3B30;border-color:#FF3B30;color:#fff;font-weight:600}
+  .revCard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .revTop{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+    padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .revTop b{font-size:18px;font-weight:600}
+  .revTop span{font-size:13px;color:var(--mute);white-space:nowrap}
+  .revFacts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:14px 0;
+    border-bottom:1px solid var(--line)}
+  .revFacts div span{display:block;font-size:11px;color:var(--mute);letter-spacing:.05em;text-transform:uppercase}
+  .revFacts div b{display:block;font-size:17px;font-weight:600;margin-top:3px}
+  .revList{list-style:none;margin-top:6px}
+  .revList li{display:flex;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1px solid #1E1E22;font-size:14px}
+  .revList li:last-child{border-bottom:0}
+  .revList .rt{width:52px;flex:0 0 52px;font-weight:600;color:var(--mute)}
+  .revList .rg{width:62px;flex:0 0 62px;font-weight:600;color:var(--hot)}
+  .revList .rn{flex:1;font-size:13px;color:var(--mute)}
   .ehead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 0 16px}
   .ehead strong{font-size:15px;font-weight:600}
   .ehead button{font-size:14px;padding:9px 15px;border-radius:100px;border:1px solid var(--line);color:var(--mute)}
@@ -177,20 +274,58 @@
     font-size:13px;color:var(--ink)}
   .erow2 button[aria-pressed="true"]{border-color:var(--hot);color:var(--hot)}
   .esteps{list-style:none}
-  .estepRow{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px;margin-bottom:8px}
-  .estepTop{display:flex;align-items:center;gap:8px}
-  .estepTop .idx{font-size:12px;color:var(--mute);width:52px;flex:0 0 52px}
-  .estepTop input{width:100%;background:#18181B;border:1px solid var(--line);border-radius:9px;
-    padding:10px;font-size:15px;color:var(--ink);text-align:center}
-  .estepTop .cum{font-size:13px;color:var(--mute);width:58px;flex:0 0 58px;text-align:right}
-  .estepTop .rm{color:var(--mute);font-size:20px;padding:0 4px;flex:0 0 auto}
-  .estepNote{width:100%;background:#18181B;border:1px solid var(--line);border-radius:9px;
-    padding:10px;font-size:13.5px;color:var(--ink);margin-top:8px}
-  .ecap{display:flex;gap:8px;font-size:10.5px;color:var(--mute);letter-spacing:.06em;
-    text-transform:uppercase;padding:0 4px 6px}
-  .ecap i{font-style:normal}
-  .eadd{width:100%;padding:13px;border-radius:12px;background:#18181B;border:1px dashed var(--line);
-    color:var(--mute);font-size:13.5px}
+
+  /* the list IS the timeline: a rail down the left, gaps labelled between
+     pours, and each row carrying its own share of the total water */
+  .eTimeCap{font-size:12.5px;color:var(--mute);margin:-4px 0 14px;line-height:1.45}
+
+  .eGap{display:flex;align-items:center;gap:10px;padding:0 0 0 26px;height:30px}
+  .eGap i{width:2px;height:100%;background:var(--line);flex:0 0 2px;border-radius:2px}
+  .eGap span{font-size:11.5px;color:var(--mute);letter-spacing:.04em}
+
+  /* collapsed row: reads like a sentence, not a form */
+  .eRow{background:var(--card);border:1px solid var(--line);border-radius:13px;margin-bottom:8px;
+    overflow:hidden;transition:border-color 200ms}
+  .eRow.open{border-color:var(--hot)}
+  .eRowHead{display:grid;grid-template-columns:54px 1fr auto;gap:12px;width:100%;
+    padding:13px 13px 13px 0;text-align:left;align-items:center}
+  .eRowHead .when{text-align:center}
+  .eRowHead .when b{display:block;font-size:14px;font-weight:600;line-height:1.2}
+  .eRowHead .when i{display:block;font-size:10.5px;font-style:normal;color:var(--mute);margin-top:1px}
+  .eRow.open .eRowHead .when b{color:var(--hot)}
+  .eRowHead .mid{min-width:0}
+  .eRowHead .nt{font-size:13.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .eRowHead .sub{font-size:11.5px;color:var(--mute);margin-top:2px}
+  .eRowHead .chev{font-size:17px;color:var(--mute);transition:transform 220ms;padding-right:4px}
+  .eRow.open .chev{transform:rotate(90deg)}
+
+
+
+  /* expanded: one labelled control at a time, nothing to mix up */
+  .eRowBody{display:none;padding:4px 13px 14px;border-top:1px solid var(--line)}
+  .eRow.open .eRowBody{display:block}
+  .ctl{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #1E1E22}
+  .ctl:last-of-type{border-bottom:0}
+  .ctl .lab{flex:1;min-width:0}
+  .ctl .lab b{display:block;font-size:13.5px;font-weight:500}
+  .ctl .lab span{display:block;font-size:11.5px;color:var(--mute);margin-top:2px;line-height:1.35}
+  .ctl .grp{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+  .ctl button{width:42px;height:42px;border-radius:11px;background:#1D1D21;border:1px solid var(--line);
+    font-size:19px;color:var(--ink);transition:transform 110ms}
+  .ctl button:active{transform:scale(.9)}
+  .ctl input{width:64px;background:#1D1D21;border:1px solid var(--line);border-radius:11px;
+    padding:11px 4px;font-size:16px;font-weight:600;color:var(--ink);text-align:center}
+  .ctl .ro{width:64px;text-align:center;font-size:16px;font-weight:600}
+  .noteIn{width:100%;background:#1D1D21;border:1px solid var(--line);border-radius:11px;
+    padding:12px;font-size:13.5px;color:var(--ink);margin-top:11px}
+  .rmBtn{width:100%;margin-top:11px;padding:12px;border-radius:11px;background:none;
+    border:1px solid #3A2420;color:#E8766A;font-size:13px}
+  .eadd{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+    padding:17px;margin-top:10px;border-radius:13px;background:#1D1D21;
+    border:1px solid var(--hot);color:var(--hot);font-size:15.5px;font-weight:600;
+    transition:transform 120ms,background 200ms}
+  .eadd i{font-style:normal;font-size:20px;font-weight:400;line-height:1}
+  .eadd:active{transform:scale(.985);background:#241A15}
   .ewarn{background:#1C0F0E;border:1px solid var(--over);border-radius:12px;padding:12px 14px;
     font-size:13px;color:#FF8E86;line-height:1.5;margin-top:10px}
   .ewarn button{color:var(--hot);font-weight:600;text-decoration:underline}
@@ -241,10 +376,14 @@
     .tabs button{flex:0 0 auto;padding:19px 22px;font-size:14px}
     .tabs button[aria-selected="true"]{box-shadow:inset 0 -2px 0 var(--hot)}
 
-    .conn{padding:14px 2px 10px}
-    .conn .lab{font-size:13.5px}
-    .top{padding:2px 2px 18px}
-    .top h1{font-size:17px}
+    .hdr{display:flex;align-items:center;justify-content:space-between;gap:24px;
+      padding:6px 0 20px;border-bottom:1px solid var(--line);margin-bottom:20px}
+    .top{padding:0;order:1;flex:1;min-width:0;display:block}
+    .top h1{font-size:19px;letter-spacing:-.015em}
+    .top .r{font-size:13px;display:block;margin-top:3px}
+    .conn{order:2;width:auto;flex:0 0 auto;max-width:360px;margin:0;padding:11px 12px}
+    .connTxt b{font-size:13.5px}
+    .connTxt i{font-size:11.5px;white-space:nowrap}
 
     /* two columns: what you look at while pouring on the left,
        what you consult between pours on the right */
@@ -252,6 +391,8 @@
     .colA{position:sticky;top:calc(78px + env(safe-area-inset-top))}
 
     .inner{padding:30px 30px 26px}
+    .viz{width:150px;right:26px;top:24px}
+    .cue,.target,.sub2{padding-right:170px}
     .cue{font-size:13px;letter-spacing:.16em}
     .target{font-size:148px;letter-spacing:-.05em}
     .target em{font-size:34px}
@@ -264,8 +405,8 @@
     .clock{font-size:28px}
     .of{font-size:13.5px}
 
-    .live dd{font-size:22px}
-    .live div{padding:13px 15px}
+    .live dd{font-size:42px}
+    .live div{padding:18px 20px}
 
     .step{grid-template-columns:62px 1fr auto;padding:17px 16px}
     .step .t{font-size:16px}
@@ -314,24 +455,102 @@
     body{max-width:1120px}
     .bar{max-width:1120px}
   }
-  @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+
+  /* ---- press and hover feedback ----
+     hover only where a real pointer exists, so phones don't get a hover
+     state stuck on the last thing you tapped */
+  button{transition:transform 110ms ease, background 180ms ease,
+    border-color 180ms ease, opacity 180ms ease}
+  button:active{transform:scale(.96)}
+
+  .ehead button:active,.wNav button:active,.bar button:active,.eadd:active,
+  .newBtn:active,.card:active,.conn:active,.taste button:active,
+  .mode button:active,.scaleBtns button:active{transform:scale(.975)}
+
+  /* pressed tint by button family */
+  .ehead button:active,.gh:active,.dose button:active,.ctl button:active,
+  .estep button:active,.scaleBtns .sghost:active{background:#2A2A30 !important;
+    border-color:#45454E !important}
+  .go:active,.newBtn:active,.scaleBtns .sbig:active,.wNav .go:active,
+  .save .do:active{filter:brightness(.88)}
+  .eadd:active{background:#241A15}
+  .card:active{border-color:#45454E}
+  .conn:active{background:#1A1A1E}
+  .eRowHead:active{background:#1A1A1E}
+  .tabs button:active{opacity:.6}
+  .log .del:active,.rmBtn:active{background:#2A1715;border-color:#5A3029}
+
+  @media (hover:hover) and (pointer:fine){
+    .ehead button:hover,.gh:hover,.dose button:hover,.ctl button:hover,
+    .estep button:hover,.scaleBtns .sghost:hover,.taste button:hover,
+    .mode button:not([aria-pressed="true"]):hover{background:#26262C;border-color:#43434C}
+    .go:hover,.newBtn:hover,.wNav .go:hover,.scaleBtns .sbig:hover,
+    .save .do:hover,.connAct:hover{filter:brightness(1.08)}
+    .eadd:hover{background:#241A15}
+    .card:hover{border-color:#43434C}
+    .conn:hover{border-color:#43434C;background:#17171A}
+    .eRowHead:hover{background:#17171A}
+    .tabs button:hover{color:var(--ink)}
+    .wSteps li.tappable:hover i{background:#43434C;color:var(--ink)}
+    .log .del:hover,.rmBtn:hover{background:#2A1715;border-color:#5A3029}
+    .delR:hover{background:#2A1715}
+  }
+
+  /* the stage rail is navigation, not decoration */
+  .wSteps li.tappable{cursor:pointer}
+  .wSteps li.tappable:active i{transform:scale(.9)}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important}
+    .stage.pour .vStream{opacity:.9}
+  }
 </style>
 </head>
 <body>
 
-<div class="conn">
-  <span class="dot" id="cDot"></span>
-  <span class="lab" id="cLab">Scale not connected — running on the clock</span>
-  <button id="cBtn">Connect</button>
-</div>
+<div class="hdr">
+<button class="conn" id="connCard">
+  <span class="connDot" id="cDot"></span>
+  <span class="connTxt">
+    <b id="cTitle">Connect your scale</b>
+    <i id="cLab">Tap to pair the Timemore Dot</i>
+  </span>
+  <span class="connAct" id="cBtn">Connect</span>
+</button>
 
 <div class="top"><h1 id="rName">—</h1><span class="r" id="rBy"></span></div>
+</div><!-- /hdr -->
 
 <section id="pBrew">
   <div class="colA">
   <div class="stage" id="stage">
     <div class="flood"></div>
     <div class="inner">
+      <svg class="viz" id="viz" viewBox="0 0 120 168" aria-hidden="true">
+        <defs>
+          <clipPath id="srvClip"><path d="M26 104 h68 v34 a10 10 0 0 1 -10 10 h-48 a10 10 0 0 1 -10 -10 z"/></clipPath>
+          <clipPath id="coneClip"><path d="M18 22 h84 l-38 62 a8 8 0 0 1 -8 0 z"/></clipPath>
+        </defs>
+
+        <!-- kettle stream: only while a pour is open -->
+        <line class="vStream" x1="60" y1="2" x2="60" y2="24"/>
+
+        <!-- cone -->
+        <path class="vCone" d="M18 22 h84 l-38 62 a8 8 0 0 1 -8 0 z"/>
+        <g clip-path="url(#coneClip)">
+          <rect class="vBed" x="14" y="52" width="92" height="40"/>
+          <rect class="vSlurry" id="vSlurry" x="14" y="52" width="92" height="0"/>
+        </g>
+
+        <!-- drip during drawdown -->
+        <circle class="vDrip" cx="60" cy="90" r="2.4"/>
+
+        <!-- server -->
+        <path class="vSrv" d="M26 104 h68 v34 a10 10 0 0 1 -10 10 h-48 a10 10 0 0 1 -10 -10 z"/>
+        <g clip-path="url(#srvClip)">
+          <rect class="vFill" id="vFill" x="26" y="148" width="68" height="0"/>
+        </g>
+      </svg>
       <div class="cue" id="cue">Ready</div>
       <div class="target" id="big" aria-live="polite">0<em>g</em></div>
       <div class="sub2" id="sub">Tare with the brewer on, then start.</div>
@@ -346,7 +565,6 @@
   <dl class="live" id="liveRow">
     <div><dt>On scale</dt><dd id="lW">—</dd></div>
     <div><dt>Flow</dt><dd id="lF">—</dd></div>
-    <div><dt>Battery</dt><dd id="lB">—</dd></div>
   </dl>
 
   </div><!-- /colA -->
@@ -393,43 +611,65 @@
   <div class="ehead">
     <button id="eCancel">Cancel</button>
     <strong id="eTitle">New recipe</strong>
-    <button id="eSave" class="prim">Save</button>
+    <span style="width:62px"></span>
   </div>
 
-  <input id="eName" placeholder="Name it — e.g. Ethiopia, light" maxlength="34">
+  <ol class="wSteps" id="wSteps">
+    <li data-s="1"><i>1</i><span>Coffee</span></li>
+    <li data-s="2"><i>2</i><span>Shape</span></li>
+    <li data-s="3"><i>3</i><span>Pours</span></li>
+    <li data-s="4"><i>4</i><span>Review</span></li>
+  </ol>
 
-  <div class="egrid">
-    <div class="efield">
-      <label>Dose</label>
-      <div class="estep"><button data-k="dose" data-d="-1">−</button><b id="vDose">15 g</b><button data-k="dose" data-d="1">+</button></div>
-    </div>
-    <div class="efield">
-      <label>Ratio</label>
-      <div class="estep"><button data-k="ratio" data-d="-1">−</button><b id="vRatio">1:15</b><button data-k="ratio" data-d="1">+</button></div>
-    </div>
-  </div>
-  <div class="ewater"><span id="vWater">225 g</span><em>total water</em></div>
-
-  <div class="egrid">
-    <div class="efield">
-      <label>Pours</label>
-      <div class="estep"><button data-k="pours" data-d="-1">−</button><b id="vPours">5</b><button data-k="pours" data-d="1">+</button></div>
-    </div>
-    <div class="efield">
-      <label>Every</label>
-      <div class="estep"><button data-k="cad" data-d="-5">−</button><b id="vCad">45 s</b><button data-k="cad" data-d="5">+</button></div>
-    </div>
+  <!-- 1 ............................................... -->
+  <div class="wPane" id="w1">
+    <h3 class="wQ">What are you brewing?</h3>
+    <p class="wHelp">Name it so you recognise it at 6am, then set how much coffee goes in.</p>
+    <input id="eName" placeholder="Ethiopia, light roast" maxlength="34">
+    <div class="ctl big"><div class="lab"><b>Dose</b><span>dry coffee in the brewer</span></div>
+      <div class="grp"><button data-k="dose" data-d="-1">−</button><span class="ro" id="vDose">15 g</span>
+      <button data-k="dose" data-d="1">+</button></div></div>
+    <div class="ctl big"><div class="lab"><b>Ratio</b><span>water per gram of coffee</span></div>
+      <div class="grp"><button data-k="ratio" data-d="-1">−</button><span class="ro" id="vRatio">1:15</span>
+      <button data-k="ratio" data-d="1">+</button></div></div>
+    <div class="wOut"><b id="vWater">225 g</b><span>of water, total</span></div>
   </div>
 
-  <div class="erow2">
-    <button id="eBloom" aria-pressed="true">Bloom 2× dose</button>
-    <button id="eAuto">Rebuild evenly</button>
+  <!-- 2 ............................................... -->
+  <div class="wPane hide" id="w2">
+    <h3 class="wQ">How many pours?</h3>
+    <p class="wHelp">This writes the recipe for you. You can change any pour on the next step.</p>
+    <div class="ctl big"><div class="lab"><b>Bloom</b><span id="vBloomG">30 g to start</span></div>
+      <div class="grp"><button id="eBloom" class="pill">2× dose</button></div></div>
+    <div class="ctl big"><div class="lab"><b>Pours</b><span>including the bloom</span></div>
+      <div class="grp"><button data-k="pours" data-d="-1">−</button><span class="ro" id="vPours">5</span>
+      <button data-k="pours" data-d="1">+</button></div></div>
+    <div class="ctl big"><div class="lab"><b>Every</b><span>gap between pours</span></div>
+      <div class="grp"><button data-k="cad" data-d="-5">−</button><span class="ro" id="vCad">45 s</span>
+      <button data-k="cad" data-d="5">+</button></div></div>
+    <div class="wPrev" id="wPrev"></div>
   </div>
 
-  <div class="sec">Pours — edit any of them</div>
-  <ul class="esteps" id="eSteps"></ul>
-  <div class="ewarn hide" id="eWarn"></div>
-  <div class="foot"><p>Grams are what that pour adds. The running total is on the right. Seconds are how long you mean to take over it — the app compares that to the Dot's live flow and tells you if you're racing.</p></div>
+  <!-- 3 ............................................... -->
+  <div class="wPane hide" id="w3">
+    <h3 class="wQ">Adjust any pour</h3>
+    <p class="wHelp" id="eTimeCap"></p>
+    <ul class="esteps" id="eSteps"></ul>
+    <button class="eadd" id="eAdd"><i>+</i>Add another pour</button>
+    <div class="ewarn hide" id="eWarn"></div>
+  </div>
+
+  <!-- 4 ............................................... -->
+  <div class="wPane hide" id="w4">
+    <h3 class="wQ">Look it over</h3>
+    <p class="wHelp">Save it and it goes to the top of your recipes.</p>
+    <div class="revCard" id="wReview"></div>
+  </div>
+
+  <div class="wNav">
+    <button id="wBack" class="gh">Back</button>
+    <button id="wNext" class="go">Next</button>
+  </div>
 </section>
 <section id="pLog" class="hide">
   <div class="sec">Brew log</div>
@@ -670,13 +910,29 @@ function anim(node, c, key){
 
 /* ---------- scale ---------- */
 function onState(s){
-  if(s.indexOf("battery:") === 0){ batt = +s.split(":")[1]; setText("lB", batt+"%"); return; }
-  var d = $("cDot"), l = $("cLab"), b = $("cBtn");
-  if(s === "ready"){ linked = true; d.className = "dot live"; l.textContent = "Dot connected — pours end on weight"; b.textContent = "Disconnect"; }
-  else if(s === "scanning"){ l.textContent = "Looking for the Dot…"; }
-  else if(s === "connecting"){ l.textContent = "Connecting…"; }
-  else { linked = false; d.className = "dot"; b.textContent = "Connect";
-         l.textContent = s === "lost" ? "Scale dropped — back on the clock" : "Scale not connected — running on the clock"; }
+  if(s.indexOf("battery:") === 0){
+    batt = +s.split(":")[1];
+    if(linked) setText("cLab", "Connected \u00b7 battery "+batt+"%");
+    return;
+  }
+  var card = $("connCard");
+  if(s === "ready"){
+    linked = true; card.className = "conn on";
+    setText("cTitle", "Timemore Dot");
+    setText("cLab", batt != null ? "Connected \u00b7 battery "+batt+"%" : "Connected \u2014 pours end on weight");
+    setText("cBtn", "Disconnect");
+  } else if(s === "scanning" || s === "connecting"){
+    card.className = "conn busy";
+    setText("cTitle", s === "scanning" ? "Looking for the Dot" : "Connecting");
+    setText("cLab", "Keep the scale awake");
+    setText("cBtn", "\u2026");
+  } else {
+    linked = false; card.className = "conn";
+    setText("cTitle", s === "lost" ? "Scale disconnected" : "Connect your scale");
+    setText("cLab", s === "lost" ? "Running on the clock \u2014 tap to reconnect"
+                                 : "Tap to pair the Timemore Dot");
+    setText("cBtn", "Connect");
+  }
   if(document.getElementById("autoTog")) drawMode();
   paint();
 }
@@ -694,10 +950,10 @@ function onData(d){
   paint();
 }
 var anyAll = false;
-$("cBtn").onclick = async function(){
+$("connCard").onclick = async function(){
   if(linked){ scale.disconnect(); onState("idle"); return; }
   if(!navigator.bluetooth){
-    $("cLab").textContent = "This browser has no Bluetooth. Open the page in Bluefy, not Safari.";
+    setText("cTitle", "Bluetooth unavailable"); setText("cLab", "Open this page in Bluefy, not Safari.");
     return;
   }
   scale = scale || new Scale(onData, onState);
@@ -710,17 +966,16 @@ $("cBtn").onclick = async function(){
     if(n === "NotFoundError"){
       if(!anyAll){
         anyAll = true;
-        $("cLab").textContent = "No Dot in that list. Tap Connect again — next try shows every nearby device.";
-        $("cBtn").textContent = "Scan all";
+        setText("cLab", "No Dot in that list \u2014 tap again to show every nearby device."); setText("cBtn", "Scan all");
       } else {
-        $("cLab").textContent = "Still nothing. Press the Dot's button to wake it, then retry.";
+        setText("cLab", "Still nothing. Press the Dot's button to wake it, then retry.");
       }
     } else if(n === "NetworkError"){
-      $("cLab").textContent = "Connected then dropped. Something else is holding it — force-quit the Timemore app.";
+      setText("cLab", "Dropped \u2014 force-quit the Timemore app, it is holding the scale.");
     } else if(n === "SecurityError"){
-      $("cLab").textContent = "Blocked. The page must be https and opened in Bluefy.";
+      setText("cLab", "Blocked \u2014 the page must be https and opened in Bluefy.");
     } else {
-      $("cLab").textContent = n + ": " + ((e && e.message) || "unknown");
+      setText("cLab", n + ": " + ((e && e.message) || "unknown"));
     }
   }
 };
@@ -854,7 +1109,28 @@ function paint(){
                               : "Leave it alone. Target "+mmss(cur.drawdown)+".";
     of = "total "+mmss(cur.drawdown);
   }
+  /* drawdown needs its own class so the drip can run */
+  if(f.kind === "draw") cls += " draw";
   setCls(st, "stageCls", cls);
+
+  /* server level = cumulative water actually in the cup */
+  var tot = sc(cur.steps[cur.steps.length-1][1]);
+  var got = !running ? 0 : (linked ? Math.max(0, weight) : (f.i >= 0 ? f.target : 0));
+  var lvl = Math.max(0, Math.min(1, got / Math.max(1, tot)));
+  var SH = 44, sy = (148 - SH*lvl).toFixed(1);
+  if(prev.vFill !== sy){
+    prev.vFill = sy;
+    el("vFill").setAttribute("y", sy);
+    el("vFill").setAttribute("height", (SH*lvl).toFixed(1));
+  }
+  /* slurry sits in the cone only while water is above the bed */
+  var wet = (f.kind === "pour") ? 1 : (f.kind === "hold" ? .45 : 0);
+  var CH = 26, cy = (78 - CH*wet).toFixed(1);
+  if(prev.vSlurry !== cy){
+    prev.vSlurry = cy;
+    el("vSlurry").setAttribute("y", cy);
+    el("vSlurry").setAttribute("height", (CH*wet).toFixed(1));
+  }
   setText("cue", cue); setHTML("big", bigHTML); setText("sub", sub); setText("of", of);
 
   if(stepEls.length){
@@ -1064,13 +1340,10 @@ $("tBrew").onclick=function(){tab("brew");}; $("tScale").onclick=function(){tab(
 document.addEventListener("visibilitychange", function(){ if(!document.hidden && running && !linked) loop(); });
 renderStatic(); renderLog();
 
-/* ================= recipe editor =================
-   what the user types:  dose, ratio, pour count, cadence, per-pour grams,
-                         per-pour seconds, notes
-   what the app derives: total water, running totals, step times, drawdown
-   incremental in, cumulative out — nobody thinks in cumulative grams while
-   standing at the counter, but that is what the brew engine needs. */
-var ED = null, editingId = null;
+/* ================= recipe builder =================
+   four stages, one question each, review at the end.
+   you type what a pour adds; the app keeps the running totals. */
+var ED = null, editingId = null, openStep = 0, wStep = 1;
 
 function loadCustom(){
   try{ var c = JSON.parse(localStorage.getItem("brew:custom")||"[]");
@@ -1078,130 +1351,234 @@ function loadCustom(){
   }catch(e){}
 }
 function saveCustom(){
-  try{
-    localStorage.setItem("brew:custom", JSON.stringify(RECIPES.filter(function(r){ return r.custom; })));
-  }catch(e){}
+  try{ localStorage.setItem("brew:custom", JSON.stringify(RECIPES.filter(function(r){ return r.custom; }))); }catch(e){}
 }
 loadCustom();
 
 function blankDraft(from){
   if(from){
-    var inc = [], prevG = 0;
-    from.steps.forEach(function(s){ inc.push({at:s[0], add:s[1]-prevG, dur:s[3]||Math.max(5,Math.round((s[1]-prevG)/8)), note:s[2]||""}); prevG = s[1]; });
+    var inc = [], prev = 0;
+    from.steps.forEach(function(s){
+      inc.push({at:s[0], add:s[1]-prev, dur:s[3]||Math.max(5,Math.round((s[1]-prev)/8)), note:s[2]||""});
+      prev = s[1];
+    });
+    var gap = inc.length > 2 ? (inc[2].at - inc[1].at) : 45;
     return { name:(from.custom ? from.name : from.name+" (mine)"), dose:from.dose,
-             ratio:+(from.water/from.dose).toFixed(1), bloom2:true, cad:45, steps:inc };
+             ratio:+(from.water/from.dose).toFixed(1), bloom2:(inc[0].add <= from.dose*2.4),
+             cad:gap, steps:inc, touched:true };
   }
-  return { name:"", dose:15, ratio:15, bloom2:true, cad:45, steps:null };
+  return { name:"", dose:15, ratio:15, bloom2:true, cad:45, pours:3, steps:null, touched:false };
 }
+function total(){ return Math.round(ED.dose * ED.ratio); }
+
+/* regenerate from dose/ratio/pours/cadence. implicit — no button to press. */
 function rebuild(){
-  var total = Math.round(ED.dose * ED.ratio);
-  var bloom = Math.round(ED.dose * (ED.bloom2 ? 2 : 3));
-  var n = ED.pours || 5, rest = total - bloom, each = Math.round(rest / (n-1));
+  var tot = total(), bloom = Math.round(ED.dose * (ED.bloom2 ? 2 : 3));
+  var n = Math.max(1, ED.pours || (ED.steps ? ED.steps.length : 3));
   var out = [{at:0, add:bloom, dur:Math.max(6,Math.round(bloom/6)), note:"Bloom"}];
   var run = bloom;
-  for(var i=1;i<n;i++){
-    var add = (i === n-1) ? (total - run) : each;
-    run += add;
-    out.push({at: 40 + (i-1)*ED.cad, add:add, dur:Math.max(5,Math.round(add/8)), note:""});
+  if(n > 1){
+    var each = Math.round((tot - bloom) / (n-1));
+    for(var i=1;i<n;i++){
+      var add = (i === n-1) ? (tot - run) : each;
+      run += add;
+      out.push({at: 40 + (i-1)*ED.cad, add:Math.max(1,add), dur:Math.max(5,Math.round(add/8)), note:""});
+    }
   }
   ED.steps = out;
 }
-function drawEditor(){
+
+/* ---------------- stage 1 + 2 ---------------- */
+function drawBasics(){
   setText("vDose", ED.dose+" g");
   setText("vRatio", "1:"+ED.ratio);
-  setText("vWater", Math.round(ED.dose*ED.ratio)+" g");
-  setText("vPours", String(ED.steps.length));
+  setText("vWater", total()+" g");
+  setText("vPours", String(ED.steps ? ED.steps.length : ED.pours || 3));
   setText("vCad", ED.cad+" s");
-  $("eBloom").textContent = ED.bloom2 ? "Bloom 2× dose" : "Bloom 3× dose";
-  $("eName").value = ED.name;
+  $("eBloom").textContent = (ED.bloom2 ? "2×" : "3×") + " dose";
+  setText("vBloomG", Math.round(ED.dose*(ED.bloom2?2:3))+" g to start");
+  if($("eName").value !== ED.name) $("eName").value = ED.name;
 
-  var total = Math.round(ED.dose*ED.ratio), run = 0, rows = '<li class="ecap"><i style="width:52px;flex:0 0 52px">At</i><i style="flex:1">Add g</i><i style="flex:1">Secs</i><i style="width:58px;flex:0 0 58px;text-align:right">Total</i></li>';
-  ED.steps.forEach(function(s,i){
+  if(ED.steps){
+    var run = 0, last = ED.steps[ED.steps.length-1];
+    $("wPrev").innerHTML =
+      '<div class="pvHead">What this builds</div>' +
+      ED.steps.map(function(s,i){
+        run += s.add;
+        return '<div class="pvRow"><span class="pt">'+mmss(s.at)+'</span>'+
+               '<span class="pa">+'+s.add+' g</span>'+
+               '<span class="pc">\u2192 '+run+' g</span>'+
+               '<span class="pn">'+(i===0 ? "bloom" : "pour "+(i+1))+'</span></div>';
+      }).join("") +
+      '<div class="pvFoot">Finishes around '+mmss(last.at + last.dur + 45)+
+      ' \u00b7 adjust any of it on the next step</div>';
+  }
+}
+
+/* ---------------- stage 3 ---------------- */
+function drawSteps(){
+  var tot = total(), last = ED.steps[ED.steps.length-1], run = 0;
+  setText("eTimeCap", ED.steps.length+" pours, "+tot+" g of water, done by "+mmss(last.at+last.dur)+".");
+
+  $("eSteps").innerHTML = ED.steps.map(function(s,i){
     run += s.add;
-    rows += '<li class="estepRow" data-i="'+i+'"><div class="estepTop">'+
-      '<span class="idx">'+mmss(s.at)+'</span>'+
-      '<input type="number" inputmode="numeric" class="eAt" value="'+s.at+'" aria-label="start second">'+
-      '<input type="number" inputmode="decimal" class="eAdd" value="'+s.add+'" aria-label="grams to add">'+
-      '<input type="number" inputmode="numeric" class="eDur" value="'+s.dur+'" aria-label="pour seconds">'+
-      '<span class="cum">'+run+' g</span>'+
-      '<button class="rm" aria-label="remove">×</button></div>'+
-      '<input class="estepNote" placeholder="What to do here — swirl, pour centre-out…" value="'+
-        (s.note||"").replace(/"/g,"&quot;")+'"></li>';
-  });
-  rows += '<li><button class="eadd" id="eAdd">+ Add a pour</button></li>';
-  $("eSteps").innerHTML = rows;
+    var prevRun = run - s.add, gap = i === 0 ? null : s.at - ED.steps[i-1].at;
+    var lead = gap === null ? "" : '<li class="eGap"><i></i><span>'+gap+'s</span></li>';
+    return lead + '<li class="eRow'+(i===openStep?' open':'')+'" data-i="'+i+'">'+
+      '<button class="eRowHead" data-row="'+i+'">'+
+        '<span class="when"><b>'+mmss(s.at)+'</b><i>'+s.dur+'s</i></span>'+
+        '<span class="mid"><span class="nt">+'+s.add+' g <em>→ '+run+' g</em></span>'+
+        '<span class="sub">'+(s.note || (i===0 ? "bloom" : "pour "+(i+1)))+'</span></span>'+
+        '<span class="chev">›</span></button>'+
+      '<div class="eRowBody">'+
+        '<div class="ctl"><div class="lab"><b>Starts at</b><span>'+
+          (i===0 ? "the bloom opens the clock" : gap+"s after the pour before")+'</span></div>'+
+        '<div class="grp">'+(i===0 ? '<span class="ro">0:00</span>'
+          : '<button data-act="at-" data-i="'+i+'">−</button><span class="ro">'+mmss(s.at)+
+            '</span><button data-act="at+" data-i="'+i+'">+</button>')+'</div></div>'+
+        '<div class="ctl"><div class="lab"><b>Pours</b><span>'+prevRun+' g → '+run+' g</span></div>'+
+        '<div class="grp"><button data-act="g-" data-i="'+i+'">−</button>'+
+          '<input class="gIn" data-i="'+i+'" type="number" inputmode="decimal" value="'+s.add+'">'+
+          '<button data-act="g+" data-i="'+i+'">+</button></div></div>'+
+        '<div class="ctl"><div class="lab"><b>How long you pour</b><span>'+s.dur+' seconds for '+s.add+
+          ' g \u2014 about '+(s.add/Math.max(1,s.dur)).toFixed(1)+' g/s. The app checks your real flow against this.</span></div>'+
+        '<div class="grp"><button data-act="d-" data-i="'+i+'">−</button><span class="ro">'+s.dur+
+          's</span><button data-act="d+" data-i="'+i+'">+</button></div></div>'+
+        '<input class="noteIn" data-i="'+i+'" maxlength="60" placeholder="Swirl, pour centre-out…" value="'+
+          (s.note||"").replace(/"/g,"&quot;")+'">'+
+        (ED.steps.length > 1 ? '<button class="rmBtn" data-act="rm" data-i="'+i+'">Remove this pour</button>' : '')+
+      '</div></li>';
+  }).join("");
 
-  var w = [], last = -1;
+  var w = [];
   for(var i=0;i<ED.steps.length;i++){
     var s = ED.steps[i];
-    if(s.at <= last && i > 0) w.push("Pour "+(i+1)+" starts before pour "+i+" does.");
+    if(i > 0 && s.at <= ED.steps[i-1].at) w.push("Pour "+(i+1)+" starts before pour "+i+" does.");
     if(i < ED.steps.length-1 && s.at + s.dur > ED.steps[i+1].at)
-      w.push("Pour "+(i+1)+" runs "+s.dur+"s but the next one starts "+(ED.steps[i+1].at - s.at)+"s later.");
-    last = s.at;
+      w.push("Pour "+(i+1)+" runs "+s.dur+"s but the next starts "+(ED.steps[i+1].at-s.at)+"s later.");
   }
-  if(run !== total) w.push("Pours add up to "+run+" g, not "+total+" g. <button id='eBal'>Balance the last pour</button>");
+  if(run !== tot) w.push("Pours add up to "+run+" g, not "+tot+" g. <button id='eBal'>Balance the last pour</button>");
   if(w.length){ $("eWarn").className = "ewarn"; $("eWarn").innerHTML = w.join("<br>"); }
   else $("eWarn").className = "ewarn hide";
-
   var bal = $("eBal");
   if(bal) bal.onclick = function(){
     var r = 0; for(var i=0;i<ED.steps.length-1;i++) r += ED.steps[i].add;
-    ED.steps[ED.steps.length-1].add = total - r; drawEditor();
+    ED.steps[ED.steps.length-1].add = Math.max(1, tot - r); ED.touched = true; drawSteps();
   };
-  $("eAdd").onclick = function(){
-    var l = ED.steps[ED.steps.length-1];
-    ED.steps.push({at:l.at + ED.cad, add:30, dur:5, note:""}); drawEditor();
-  };
-  [].slice.call($("eSteps").querySelectorAll(".estepRow")).forEach(function(row){
-    var i = +row.dataset.i;
-    row.querySelector(".eAt").onchange   = function(){ ED.steps[i].at   = Math.max(0,+this.value|0); drawEditor(); };
-    row.querySelector(".eAdd").onchange  = function(){ ED.steps[i].add  = Math.max(0,+this.value);   drawEditor(); };
-    row.querySelector(".eDur").onchange  = function(){ ED.steps[i].dur  = Math.max(1,+this.value|0); drawEditor(); };
-    row.querySelector(".estepNote").onchange = function(){ ED.steps[i].note = this.value.slice(0,60); };
-    row.querySelector(".rm").onclick = function(){
-      if(ED.steps.length <= 1) return;
-      ED.steps.splice(i,1); drawEditor();
-    };
-  });
 }
-function openEditor(from, id){
-  ED = blankDraft(from); editingId = id || null;
-  if(!ED.steps){ ED.pours = 5; rebuild(); }
-  setText("eTitle", id ? "Edit recipe" : "New recipe");
-  prev = {}; drawEditor();
-  $("pBrew").className = "hide"; $("pList").className = "hide"; $("pLog").className = "hide";
-  $("pScale").className = "hide"; $("pEdit").className = "";
-  $("actionBar").className = "bar hide";
-  document.body.style.paddingBottom = "84px";
+
+/* ---------------- stage 4 ---------------- */
+function drawReview(){
+  var run = 0, last = ED.steps[ED.steps.length-1];
+  var rows = ED.steps.map(function(s,i){
+    run += s.add;
+    return '<li><span class="rt">'+mmss(s.at)+'</span><span class="rg">'+run+' g</span>'+
+      '<span class="rn">+'+s.add+' g over '+s.dur+'s'+(s.note ? ' · '+s.note : '')+'</span></li>';
+  }).join("");
+  var delHTML = editingId
+    ? '<button class="delR" id="wDel" data-armed="0">Delete this recipe</button>'
+    : '';
+  $("wReview").innerHTML =
+    '<div class="revTop"><b>'+(ED.name || "Untitled recipe")+'</b><span>1:'+(run/ED.dose).toFixed(1)+'</span></div>'+
+    '<div class="revFacts">'+
+      '<div><span>Dose</span><b>'+ED.dose+' g</b></div>'+
+      '<div><span>Water</span><b>'+run+' g</b></div>'+
+      '<div><span>Finishes</span><b>'+mmss(last.at+last.dur)+'</b></div>'+
+    '</div><ul class="revList">'+rows+'</ul>';
+  $("w4").querySelectorAll(".delR").forEach && [].slice.call($("w4").querySelectorAll(".delR")).forEach(function(n){ n.remove(); });
+  if(delHTML){ $("w4").insertAdjacentHTML("beforeend", delHTML); wireDelete(); }
+}
+
+/* two taps to delete — no browser confirm dialog, which some webviews swallow */
+function wireDelete(){
+  var b = $("wDel");
+  if(!b) return;
+  b.onclick = function(){
+    if(b.dataset.armed === "0"){
+      b.dataset.armed = "1";
+      b.className = "delR armed";
+      b.textContent = "Tap again to delete " + (ED.name || "this recipe");
+      setTimeout(function(){
+        if(b && b.dataset.armed === "1"){
+          b.dataset.armed = "0"; b.className = "delR"; b.textContent = "Delete this recipe";
+        }
+      }, 4000);
+      return;
+    }
+    deleteRecipe(editingId);
+  };
+}
+function deleteRecipe(id){
+  var at = -1;
+  for(var i=0;i<RECIPES.length;i++) if(RECIPES[i].id === id) at = i;
+  if(at < 0) return;
+  var wasCurrent = (cur.id === id);
+  RECIPES.splice(at, 1);
+  delete doses[id];
+  saveCustom();
+  if(wasCurrent){
+    cur = RECIPES.filter(function(r){ return !r.custom; })[0] || RECIPES[0];
+    $("reset").click();
+    renderStatic();
+  }
+  savePrefs();
+  ED = null; editingId = null;
+  tone("arm");
+  tab("list");
+}
+
+/* ---------------- navigation ---------------- */
+function goto(n){
+  wStep = Math.min(4, Math.max(1, n));
+  if(wStep >= 2 && !ED.steps) rebuild();        // a plan must exist before the rail can judge reachability
+  [1,2,3,4].forEach(function(i){ $("w"+i).className = "wPane" + (i === wStep ? "" : " hide"); });
+  var nm = ($("eName").value||"").trim();
+  if(nm) ED.name = nm;
+  var can = !!ED.name && !!ED.steps;
+  [].slice.call($("wSteps").children).forEach(function(li){
+    var s = +li.dataset.s;
+    li.className = (s === wStep ? "on" : (s < wStep ? "did" : "")) + (can ? " tappable" : "");
+  });
+  if(wStep === 1 || wStep === 2) drawBasics();
+  if(wStep === 3) drawSteps();
+  if(wStep === 4) drawReview();
+  $("wBack").disabled = (wStep === 1);
+  $("wNext").textContent = wStep === 4 ? "Save recipe" : "Next";
+  setText("eTitle", editingId ? "Edit recipe" : "New recipe");
   window.scrollTo(0,0);
 }
-document.addEventListener("click", function(e){
-  var b = e.target.closest && e.target.closest(".estep button");
-  if(!b || !ED) return;
-  var k = b.dataset.k, d = +b.dataset.d;
-  if(k === "dose")  ED.dose  = Math.min(40, Math.max(8, ED.dose + d));
-  if(k === "ratio") ED.ratio = Math.min(20, Math.max(10, +(ED.ratio + d*0.5).toFixed(1)));
-  if(k === "cad")   ED.cad   = Math.min(120, Math.max(10, ED.cad + d));
-  if(k === "pours"){ ED.pours = Math.min(9, Math.max(1, ED.steps.length + d)); rebuild(); }
-  if(k === "dose" || k === "ratio") rebuild();
-  drawEditor();
-});
-$("eBloom").onclick = function(){ ED.bloom2 = !ED.bloom2; rebuild(); drawEditor(); };
-$("eAuto").onclick  = function(){ ED.pours = ED.steps.length; rebuild(); drawEditor(); };
+$("wBack").onclick = function(){ goto(wStep-1); };
+$("wSteps").onclick = function(ev){
+  var li = ev.target.closest && ev.target.closest("li");
+  if(!li || !ED || li.className.indexOf("tappable") < 0) return;
+  var nm = ($("eName").value||"").trim();
+  if(nm) ED.name = nm;
+  if(!ED.name) return;
+  if(!ED.steps) rebuild();
+  goto(+li.dataset.s);
+};
+$("wNext").onclick = function(){
+  if(wStep === 1){
+    var nm = ($("eName").value||"").trim();
+    if(!nm){ $("eName").focus(); $("eName").placeholder = "Give it a name first"; return; }
+    ED.name = nm;
+  }
+  if(wStep === 2 && !ED.steps) rebuild();
+  if(wStep === 4){ saveRecipe(); return; }
+  goto(wStep+1);
+};
 $("eCancel").onclick = function(){ ED = null; tab("list"); };
-$("eSave").onclick = function(){
-  var name = ($("eName").value || "").trim();
-  if(!name){ $("eName").focus(); $("eWarn").className = "ewarn"; $("eWarn").textContent = "Give it a name first."; return; }
+
+function saveRecipe(){
   var run = 0, steps = ED.steps.map(function(s){ run += s.add; return [s.at, Math.round(run), s.note, s.dur]; });
   var last = ED.steps[ED.steps.length-1];
   var rec = {
-    id: editingId || ("my-" + Date.now().toString(36)),
-    custom: true, name: name, by: "Mine",
-    dose: ED.dose, water: Math.round(run), temp: "94 °C", grind: "your setting",
+    id: editingId || ("my-"+Date.now().toString(36)), custom:true,
+    name: ED.name || "Untitled recipe", by:"Mine",
+    dose: ED.dose, water: Math.round(run), temp:"94 °C", grind:"your setting",
     drawdown: last.at + last.dur + 45,
-    desc: ED.steps.length + " pours, " + Math.round(run) + " g at 1:" + (run/ED.dose).toFixed(1) + ".",
-    steps: steps,
-    foot: "<p>Your recipe. Edit it any time from the Recipes tab.</p>"
+    desc: ED.steps.length+" pours, "+Math.round(run)+" g at 1:"+(run/ED.dose).toFixed(1)+".",
+    steps: steps, foot:"<p>Your recipe. Edit it any time from the Recipes tab.</p>"
   };
   var at = -1;
   for(var i=0;i<RECIPES.length;i++) if(RECIPES[i].id === rec.id) at = i;
@@ -1209,6 +1586,60 @@ $("eSave").onclick = function(){
   saveCustom();
   cur = rec; doses[rec.id] = rec.dose; savePrefs(); renderStatic();
   ED = null; tone("stop"); tab("brew");
-};
+}
+
+function openEditor(from, id){
+  ED = blankDraft(from); editingId = id || null; openStep = 0;
+  $("pBrew").className = "hide"; $("pList").className = "hide"; $("pLog").className = "hide";
+  $("pScale").className = "hide"; $("pEdit").className = "";
+  $("actionBar").className = "bar hide";
+  document.body.style.paddingBottom = "84px";
+  goto(1);
+}
+
+/* ---------------- controls ---------------- */
+document.addEventListener("click", function(ev){
+  if(!ED) return;
+  var k = ev.target.closest && ev.target.closest("[data-k]");
+  if(k){
+    var key = k.dataset.k, d = +k.dataset.d;
+    if(key === "dose")  ED.dose  = Math.min(40, Math.max(8, ED.dose + d));
+    if(key === "ratio") ED.ratio = Math.min(20, Math.max(10, +(ED.ratio + d*0.5).toFixed(1)));
+    if(key === "cad")   ED.cad   = Math.min(120, Math.max(10, ED.cad + d));
+    if(key === "pours") ED.pours = Math.min(9, Math.max(1, (ED.steps ? ED.steps.length : 3) + d));
+    rebuild(); drawBasics(); return;
+  }
+  if(ev.target.closest && ev.target.closest("#eBloom")){ ED.bloom2 = !ED.bloom2; rebuild(); drawBasics(); return; }
+  if(ev.target.closest && ev.target.closest("#eAdd")){
+    /* split the last pour rather than appending water on top — the recipe
+       stays balanced, so adding a pour never trips the total warning */
+    var l = ED.steps[ED.steps.length-1];
+    var half = Math.max(1, Math.round(l.add / 2));
+    l.add = Math.max(1, l.add - half);
+    l.dur = Math.max(1, Math.round(l.dur / 2));
+    ED.steps.push({at:l.at + ED.cad, add:half, dur:Math.max(3,Math.round(half/8)), note:""});
+    openStep = ED.steps.length-1; ED.touched = true; drawSteps(); return;
+  }
+  var head = ev.target.closest && ev.target.closest(".eRowHead");
+  if(head){ var i = +head.dataset.row; openStep = (openStep === i) ? -1 : i; drawSteps(); return; }
+  var b = ev.target.closest && ev.target.closest(".ctl button, .rmBtn");
+  if(!b || !b.dataset.act) return;
+  var j = +b.dataset.i, s = ED.steps[j], a = b.dataset.act;
+  if(a === "at-") s.at  = Math.max((ED.steps[j-1] ? ED.steps[j-1].at + 5 : 0), s.at - 5);
+  if(a === "at+") s.at  = s.at + 5;
+  if(a === "g-")  s.add = Math.max(1, s.add - 5);
+  if(a === "g+")  s.add = s.add + 5;
+  if(a === "d-")  s.dur = Math.max(1, s.dur - 1);
+  if(a === "d+")  s.dur = s.dur + 1;
+  if(a === "rm" && ED.steps.length > 1){ ED.steps.splice(j,1); openStep = Math.max(0,j-1); }
+  ED.touched = true; drawSteps();
+});
+document.addEventListener("change", function(ev){
+  if(!ED) return;
+  var t = ev.target;
+  if(t.id === "eName") ED.name = t.value.slice(0,34);
+  if(t.classList.contains("gIn")){ ED.steps[+t.dataset.i].add = Math.max(1, +t.value||1); ED.touched = true; drawSteps(); }
+  if(t.classList.contains("noteIn")){ ED.steps[+t.dataset.i].note = t.value.slice(0,60); drawSteps(); }
+});
 </script>
 </body></html>
