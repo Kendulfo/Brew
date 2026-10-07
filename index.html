@@ -55,15 +55,14 @@
 
 
   @media (max-width:360px){
-    .target,.clock{font-size:60px}
-    .hTime{padding-left:16px}
+    .hTime{padding-left:14px}
     .hMain{padding-right:14px}
     .cue,.target,.sub2{padding-right:92px}
   }
   .heroTop{display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:start}
-  .hMain{min-width:0;padding-right:22px}
+  .hMain{min-width:0;padding-right:18px}
   /* divider is a short rule between the two readings, not a full-height border */
-  .hTime{position:relative;min-width:0;padding-left:24px}
+  .hTime{position:relative;min-width:0;padding-left:18px;padding-right:2px}
   .hTime:before{content:"";position:absolute;left:0;top:4px;bottom:14px;width:1px;
     background:#26262C;transition:background 200ms}
   .stage.pour .hTime:before{background:#4A3A2E}
@@ -79,7 +78,7 @@
   .stage.stop .cue{color:var(--over)}
 
   /* the number that matters */
-  .target{font-size:84px;font-weight:600;line-height:.9;letter-spacing:-.045em;
+  .target{font-size:clamp(46px,14.5vw,84px);font-weight:600;line-height:.9;letter-spacing:-.045em;
     margin:0;transition:color 120ms;font-feature-settings:"tnum";will-change:contents}
   .target em{font-size:22px;font-weight:400;font-style:normal;color:var(--mute);margin-left:6px;letter-spacing:0}
   .stage.pour .target{color:var(--hot)}
@@ -107,7 +106,7 @@
   .gauge i{flex:1;background:#242428;border-radius:3px;transition:background 200ms}
   .gauge i.on{background:#55555C}
 
-  .clock{font-size:84px;font-weight:600;color:var(--ink);letter-spacing:-.035em;line-height:.95}
+  .clock{font-size:clamp(46px,14.5vw,84px);font-weight:600;color:var(--ink);letter-spacing:-.035em;line-height:.95}
   .stage.pour .clock,.stage.stop .clock{color:#F4F4F2}
   .of{font-size:12.5px;color:var(--mute);letter-spacing:.03em;margin-top:9px;line-height:1.35}
   .bigTap{position:relative;display:inline-block}
@@ -468,7 +467,9 @@
     .inner{padding:30px 30px 26px}
     .cue,.target,.sub2{padding-right:170px}
     .cue{font-size:13px;letter-spacing:.16em}
-    .target,.clock{font-size:104px;letter-spacing:-.05em}
+    .target,.clock{font-size:clamp(84px,9vw,104px);letter-spacing:-.05em}
+    .hMain{padding-right:26px}
+    .hTime{padding-left:26px}
     .target em{font-size:34px}
     .sub2{font-size:17px;min-height:24px}
     .track{height:14px;border-radius:8px}
