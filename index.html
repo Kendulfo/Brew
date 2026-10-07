@@ -402,6 +402,11 @@
   .lgMiss{flex:0 0 auto;font-size:12.5px;font-weight:600}
   .lgMiss.ok{color:var(--ok)} .lgMiss.mid{color:var(--hot)} .lgMiss.bad{color:#FF7A70}
   .lgNo{flex:0 0 auto;font-size:12px;color:#55555C}
+  .lgKit{list-style:none;margin-bottom:4px}
+  .lgKit li{display:flex;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid #1E1E22}
+  .lgKit li:last-child{border-bottom:0}
+  .lgKit span{width:92px;flex:0 0 92px;font-size:12px;color:var(--mute)}
+  .lgKit b{flex:1;font-size:13.5px;font-weight:500;line-height:1.4}
   .lgMeta{font-size:12px;color:var(--mute);line-height:1.6;margin-top:14px;
     padding-top:12px;border-top:1px solid var(--line)}
   .lgDel{width:100%;margin-top:13px;padding:12px;border-radius:11px;background:none;
@@ -409,15 +414,39 @@
   .empty{font-size:13.5px;color:var(--mute);line-height:1.55;padding:14px;display:block;
     background:var(--card);border-radius:12px}
 
-  .save{border:1px solid rgba(255,106,31,.4);border-radius:14px;padding:16px;margin-bottom:18px;background:#16120F}
-  .save h4{font-size:15px;font-weight:600;margin-bottom:13px}
-  .taste{display:flex;gap:8px;margin-bottom:12px}
-  .taste button{flex:1;padding:13px 4px;border:1px solid var(--line);border-radius:11px;font-size:13px;
-    background:#18181B;color:var(--ink)}
+  .sheetWrap{position:fixed;inset:0;z-index:20;background:rgba(6,6,7,.72);
+    display:flex;align-items:flex-end;justify-content:center;padding:0;
+    animation:fadeIn 180ms ease;backdrop-filter:blur(3px)}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes riseIn{from{transform:translateY(26px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .sheetCard{width:100%;max-width:520px;max-height:88vh;overflow-y:auto;background:#141416;
+    border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;
+    padding:22px 18px calc(22px + env(safe-area-inset-bottom));
+    animation:riseIn 240ms cubic-bezier(.2,.8,.3,1)}
+  .sheetCard h4{font-size:20px;font-weight:600;letter-spacing:-.02em}
+  .sheetSub{font-size:13px;color:var(--mute);line-height:1.45;margin:5px 0 18px}
+  .fLab{display:block;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--mute);margin:14px 0 6px;font-weight:600}
+  .sheetCard input{width:100%;background:#1D1D21;border:1px solid var(--line);border-radius:12px;
+    padding:14px;font-size:15px;color:var(--ink)}
+  .fRow{display:grid;grid-template-columns:1fr 110px;gap:9px}
+  .fRow .fLab{margin-top:14px}
+  .taste{display:flex;gap:8px;margin-bottom:4px}
+  .taste button{flex:1;padding:14px 4px;border:1px solid var(--line);border-radius:12px;
+    font-size:13px;background:#1D1D21;color:var(--ink)}
   .taste button[aria-pressed="true"]{background:var(--hot);color:#0A0A0B;border-color:var(--hot)}
-  .save .do{width:100%;padding:14px;background:var(--hot);color:#0A0A0B;border-radius:12px;font-weight:600}
-  .verdict{font-size:13px;color:var(--hot);margin-top:11px;line-height:1.45}
-
+  .verdict{font-size:13px;color:var(--hot);margin-top:10px;line-height:1.45}
+  #fNotes{margin-top:14px}
+  .sheetCard .do{width:100%;margin-top:20px;padding:16px;background:var(--hot);color:#0A0A0B;
+    border-radius:13px;font-weight:600;font-size:16px}
+  .sheetCard .do2{width:100%;margin-top:9px;padding:15px;border-radius:13px;background:none;
+    border:1px solid var(--hot);color:var(--hot);font-weight:600;font-size:14px}
+  .sheetCard .do3{width:100%;margin-top:9px;padding:14px;border-radius:13px;background:none;
+    color:var(--mute);font-size:13.5px}
+  @media (min-width:820px){
+    .sheetWrap{align-items:center}
+    .sheetCard{border-radius:20px;border-bottom:1px solid var(--line);padding-bottom:22px}
+  }
   .tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0A0A0B;border-top:1px solid var(--line);
     padding-bottom:env(safe-area-inset-bottom);max-width:560px;margin:0 auto;z-index:3}
   .tabs button{flex:1;padding:16px 2px 17px;font-size:11.5px;color:var(--mute);letter-spacing:.01em;white-space:nowrap}
@@ -493,7 +522,6 @@
     .cardGrid{grid-template-columns:1fr 1fr;gap:12px}
     .card{display:flex;flex-direction:column}
     .card .desc{margin-top:auto;padding-top:7px}
-    .startGrid{grid-template-columns:1fr 1fr;gap:12px}
     .sec{margin:26px 0 12px}
     #pScale .scaleWrap{max-width:620px;margin:8px auto 0;padding:58px 24px 32px}
     .scaleNum{font-size:132px}
@@ -644,17 +672,6 @@
     <button id="dUp" aria-label="More coffee">+</button>
   </div>
 
-  <div class="save hide" id="saveBox">
-    <h4>How did it taste?</h4>
-    <div class="taste">
-      <button data-v="sour">Sour / thin</button>
-      <button data-v="good">Balanced</button>
-      <button data-v="bitter">Bitter / heavy</button>
-    </div>
-    <button class="do" id="saveBtn">Log this brew</button>
-    <div class="verdict hide" id="verdict"></div>
-  </div>
-
   <ul class="steps" id="steps"></ul>
   <div class="foot" id="foot"></div>
   </div><!-- /colB -->
@@ -755,6 +772,37 @@
     <button class="go" id="run">Start</button>
     <button class="gh" id="tare">Tare</button>
     <button class="gh" id="reset">Reset</button>
+  </div>
+</div>
+
+<div class="sheetWrap hide" id="sheetWrap">
+  <div class="sheetCard" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h4 id="sheetTitle">Brew finished</h4>
+    <p class="sheetSub">Log what you used, or skip it — none of this is required.</p>
+
+    <label class="fLab" for="fBeans">Beans</label>
+    <input id="fBeans" placeholder="Ethiopia Guji, washed" maxlength="40">
+
+    <div class="fRow">
+      <div><label class="fLab" for="fGrinder">Grinder</label>
+        <input id="fGrinder" placeholder="DF54" maxlength="24"></div>
+      <div><label class="fLab" for="fGrind">Setting</label>
+        <input id="fGrind" type="number" inputmode="decimal" placeholder="80"></div>
+    </div>
+
+    <label class="fLab">Taste</label>
+    <div class="taste">
+      <button data-v="sour">Sour / thin</button>
+      <button data-v="good">Balanced</button>
+      <button data-v="bitter">Bitter / heavy</button>
+    </div>
+    <div class="verdict hide" id="verdict"></div>
+
+    <input id="fNotes" placeholder="Anything else worth remembering" maxlength="80">
+
+    <button class="do" id="saveBtn">Save brew</button>
+    <button class="do2 hide" id="saveAsRecipe">Also save as a recipe</button>
+    <button class="do3" id="sheetSkip">Skip and reset</button>
   </div>
 </div>
 
@@ -921,6 +969,7 @@ var clk = 0, running = false, ticker = null, t0 = 0;        // clock fallback
 var weight = 0, flow = 0, batt = null, linked = false;
 var hits = {}, cued = {}, lastKind = "", scale = null;
 var lastRecipe = null;
+var kit = { beans:"", grinder:"", grind:"" };      // remembered between brews
 var countUp = false;                    // cafe 1: brewers used to watching weight rise
 var segs = [], inPour = false, seg = null, quiet = 0;
 var auto = true, armed = false, armBase = 0;
@@ -937,9 +986,9 @@ var dose = function(){ return doses[cur.id] || cur.dose; };
 var sc = function(g){ return Math.round(g * dose() / cur.dose); };
 
 try{ var sp = localStorage.getItem("brew:prefs"); if(sp){ var v = JSON.parse(sp);
-  doses = v.doses||{}; if(v.auto === false) auto = false; if(v.up) countUp = true; if(v.id === "freestyle") cur = FREESTYLE; else { var r = RECIPES.filter(function(x){return x.id===v.id;})[0]; if(r) cur = r; } } }catch(e){}
+  doses = v.doses||{}; if(v.auto === false) auto = false; if(v.up) countUp = true; if(v.kit) kit = v.kit; if(v.id === "freestyle") cur = FREESTYLE; else { var r = RECIPES.filter(function(x){return x.id===v.id;})[0]; if(r) cur = r; } } }catch(e){}
 try{ var sl = localStorage.getItem("brew:log"); if(sl) log = JSON.parse(sl)||[]; }catch(e){}
-function savePrefs(){ try{ localStorage.setItem("brew:prefs", JSON.stringify({id:cur.id,doses:doses,auto:auto,up:countUp})); }catch(e){} }
+function savePrefs(){ try{ localStorage.setItem("brew:prefs", JSON.stringify({id:cur.id,doses:doses,auto:auto,up:countUp,kit:kit})); }catch(e){} }
 function saveLog(){ try{ localStorage.setItem("brew:log", JSON.stringify(log.slice(0,60))); }catch(e){} }
 
 /* ---------- cues ---------- */
@@ -1323,7 +1372,7 @@ function cues(f){
     cued["hit"+f.i] = 1;
     if(linked){ hits[f.i] = weight - f.target; tone("stop"); }
   }
-  if(clk >= cur.drawdown && !cued.done){ cued.done = 1; tone("done"); $("saveBox").className = "save"; }
+  if(clk >= cur.drawdown && !cued.done){ cued.done = 1; tone("done"); openSheet(); }
 }
 
 /* ---------- clock (fallback + render pump) ---------- */
@@ -1364,7 +1413,7 @@ $("run").onclick = async function(){
         if(seg.add >= 2) segs.push(seg);
         seg = null;
       }
-      tone("done"); $("saveBox").className = "save";
+      tone("done"); openSheet();
     }
     $("run").className = "go on"; drawMode(); paint();
     return;
@@ -1391,7 +1440,7 @@ $("reset").onclick = function(){
   running = false; armed = false; clearInterval(ticker); clk = 0; weight = 0; hits = {}; cued = {}; lastKind = "";
   if(linked) scale.reset();
   $("run").className = "go"; $("run").textContent = runLabel(); drawMode();
-  $("saveBox").className = "save hide"; $("verdict").className = "verdict hide"; taste = null;
+  closeSheet(); $("verdict").className = "verdict hide"; taste = null;
   [].slice.call(document.querySelectorAll(".taste button")).forEach(function(b){ b.setAttribute("aria-pressed","false"); });
   paint();
 };
@@ -1483,21 +1532,66 @@ function cards(list){
     v.className = "verdict";
   };
 });
-$("saveBtn").onclick = function(){
-  if(!taste){ $("verdict").textContent = "Pick how it tasted first."; $("verdict").className = "verdict"; return; }
+function openSheet(){
+  $("fBeans").value   = kit.beans   || "";
+  $("fGrinder").value = kit.grinder || "";
+  $("fGrind").value   = kit.grind   || "";
+  $("fNotes").value   = "";
+  $("saveAsRecipe").className = (cur.free && segs.length) ? "do2" : "do2 hide";
+  $("sheetWrap").className = "sheetWrap";
+}
+function closeSheet(){ $("sheetWrap").className = "sheetWrap hide"; }
+
+/* every exit from the sheet logs the brew and clears the bench for the next one */
+function finishBrew(withForm){
+  var extras = {};
+  if(withForm){
+    kit.beans   = ($("fBeans").value||"").trim().slice(0,40);
+    kit.grinder = ($("fGrinder").value||"").trim().slice(0,24);
+    kit.grind   = ($("fGrind").value||"").trim().slice(0,8);
+    savePrefs();
+    extras = { beans:kit.beans, grinder:kit.grinder, grind:kit.grind,
+               notes:($("fNotes").value||"").trim().slice(0,80) };
+  }
+  writeLog(extras);
+  closeSheet();
+  renderLog();
+  $("reset").click();          // bench cleared, ready for the next brew
+  tab("log");
+}
+$("sheetSkip").onclick = function(){ finishBrew(false); };
+
+$("saveAsRecipe").onclick = function(){
+  if(!segs.length) return;
+  /* what you actually poured becomes the recipe: start times from the clock,
+     cumulative weight from the scale, duration from how long each pour ran */
+  var steps = segs.map(function(s,i){
+    return [s.t0, Math.round(s.w1), i === 0 ? "Bloom" : "", Math.max(1, s.t1 - s.t0)];
+  });
+  var last = segs[segs.length-1];
+  var d = new Date();
+  openEditor({
+    name: "Freestyle " + d.toLocaleDateString(undefined,{month:"short",day:"numeric"}),
+    custom: true, dose: dose(), water: Math.round(last.w1),
+    drawdown: clk, steps: steps
+  }, null);
+};
+$("saveBtn").onclick = function(){ finishBrew(true); };
+function writeLog(x){
   if(cur.free){
     var fin = linked ? +weight.toFixed(1) : null;
     log.unshift({
       d:Date.now(), r:"Freestyle", rid:"freestyle", by:"No recipe", free:true,
       dose:dose(), water:(fin || 0), temp:cur.temp, grind:cur.grind,
-      t:taste, total:mmss(clk), end:fin, linked:linked,
+      t:(taste||"unrated"), total:mmss(clk), end:fin, linked:linked,
+      beans:x.beans, grinder:x.grinder, grind:x.grind, notes:x.notes,
       segs: segs.map(function(s){
         return { t0:s.t0, t1:s.t1, add:s.add, w1:s.w1,
                  rate:+(s.add / Math.max(1, s.t1 - s.t0)).toFixed(1), peak:+s.peak.toFixed(1) };
       }),
       acc:null
     });
-    saveLog(); $("saveBox").className = "save hide"; renderLog(); tab("log");
+    saveLog();
     return;
   }
   var pours = cur.steps.map(function(s,i){
@@ -1507,19 +1601,20 @@ $("saveBtn").onclick = function(){
   log.unshift({
     d:Date.now(), r:cur.name, rid:cur.id, by:cur.by,
     dose:dose(), water:sc(cur.water), temp:cur.temp, grind:cur.grind,
-    t:taste, total:mmss(clk), target:cur.drawdown,
+    t:(taste||"unrated"), total:mmss(clk), target:cur.drawdown,
+    beans:x.beans, grinder:x.grinder, grind:x.grind, notes:x.notes,
     end:(linked ? +weight.toFixed(1) : null), linked:linked,
     pours:pours, acc:(ov.length ? Math.max.apply(null, ov) : null)
   });
-  saveLog(); $("saveBox").className = "save hide"; renderLog(); tab("log");
-};
+  saveLog();
+}
 var openLog = -1;
 function renderLog(){
   if(!log.length){
     $("logList").innerHTML = '<li class="empty">Nothing logged yet. Rate a brew when it finishes and it lands here with every pour you hit or missed.</li>';
     $("logFoot").textContent = ""; return;
   }
-  var TL = {sour:"sour / thin", good:"balanced", bitter:"bitter / heavy"};
+  var TL = {sour:"sour / thin", good:"balanced", bitter:"bitter / heavy", unrated:"not rated"};
   $("logList").innerHTML = log.map(function(e,i){
     var dt = new Date(e.d);
     var when = dt.toLocaleDateString(undefined,{month:"short",day:"numeric"}) + " \u00b7 " +
@@ -1556,9 +1651,22 @@ function renderLog(){
                    '<span class="ln">'+(p.note || "pour "+(n+1))+'</span>'+m+'</li>';
           }).join("")+'</ul>';
       }
+      var kitRows = [];
+      if(e.beans)   kitRows.push(["Beans", e.beans]);
+      if(e.grinder) kitRows.push(["Grinder", e.grinder]);
+      if(e.grind)   kitRows.push(["Setting", e.grind]);
+      if(e.dose)    kitRows.push(["Dose", e.dose+" g"]);
+      if(e.temp)    kitRows.push(["Water temp", e.temp]);
+      if(e.notes)   kitRows.push(["Notes", e.notes]);
+      var kitHTML = kitRows.length
+        ? '<div class="lgHead">Setup</div><ul class="lgKit">'+
+          kitRows.map(function(r){
+            return '<li><span>'+r[0]+'</span><b>'+r[1]+'</b></li>'; }).join("")+'</ul>'
+        : '';
+
       var bits = [];
       if(e.by) bits.push("Recipe by "+e.by);
-      if(e.grind) bits.push("Grind "+e.grind);
+
       if(e.temp) bits.push(e.temp);
       if(e.end != null) bits.push("Ended at "+e.end+" g");
       if(e.target) bits.push("Drawdown target "+mmss(e.target));
@@ -1567,14 +1675,14 @@ function renderLog(){
         var pk = Math.max.apply(null, e.segs.map(function(s){ return s.peak; }));
         bits.push("Peak flow "+pk+" g/s");
       }
-      body = '<div class="lgBody">'+facts+pours+
+      body = '<div class="lgBody">'+facts+kitHTML+pours+
         '<div class="lgMeta">'+bits.join(" \u00b7 ")+'</div>'+
         '<button class="lgDel" data-i="'+i+'">Delete this entry</button></div>';
     }
     return '<li class="lgItem'+(i===openLog?' open':'')+'">'+
       '<button class="lgHeadBtn" data-i="'+i+'">'+
         '<span class="lgMain"><span class="lt">'+e.r+'</span>'+
-        '<span class="ls">'+when+' \u00b7 '+e.dose+' g / '+e.water+' g'+
+        '<span class="ls">'+(e.beans ? e.beans+' \u00b7 ' : '')+when+' \u00b7 '+e.dose+' g / '+e.water+' g'+
           (e.free && e.segs ? ' \u00b7 '+e.segs.length+' pours' : '')+' \u00b7 '+e.total+'</span></span>'+
         '<span class="lgTag '+e.t+'">'+(TL[e.t]||e.t)+'</span>'+
         '<span class="chev">\u203a</span></button>'+body+'</li>';
