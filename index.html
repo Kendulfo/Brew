@@ -53,51 +53,41 @@
   .stage.stop .flood{opacity:1;background:radial-gradient(120% 90% at 50% 0%,rgba(255,59,48,.3),transparent 70%)}
   .inner{position:relative;z-index:1;padding:20px 20px 18px}
 
-  /* brewer: every moving part is bound to a real number — server level is
-     cumulative weight, stream runs only during a pour, drip during drawdown */
-  .viz{position:absolute;right:16px;top:18px;width:104px;height:auto;
-    pointer-events:none;opacity:.95;z-index:0}
-  .cue,.target,.sub2{padding-right:118px}
-  .vCone,.vSrv{fill:none;stroke:#3A3A42;stroke-width:2.4;stroke-linejoin:round;transition:stroke 260ms}
-  .stage.pour .vCone,.stage.pour .vSrv{stroke:#6A4A36}
-  .stage.stop .vCone,.stage.stop .vSrv{stroke:#6E322A}
-  .vBed{fill:#2A2024}
-  .vSlurry{fill:var(--hot);opacity:.55;transition:y 200ms linear,height 200ms linear}
-  .vFill{fill:var(--hot);transition:y 260ms cubic-bezier(.4,0,.2,1),height 260ms cubic-bezier(.4,0,.2,1)}
-  .stage.stop .vFill,.stage.stop .vSlurry{fill:var(--over)}
-
-  .vStream{stroke:var(--hot);stroke-width:3.2;stroke-linecap:round;opacity:0;
-    stroke-dasharray:5 7;transition:opacity 200ms}
-  .stage.pour .vStream{opacity:.9;animation:pourRun .45s linear infinite}
-  @keyframes pourRun{to{stroke-dashoffset:-12}}
-
-  .vDrip{fill:var(--hot);opacity:0}
-  .stage.draw .vDrip{animation:drip 1.5s ease-in infinite}
-  @keyframes drip{
-    0%{opacity:0;transform:translateY(0) scale(.6)}
-    18%{opacity:.9;transform:translateY(0) scale(1)}
-    75%{opacity:.9;transform:translateY(14px) scale(.85)}
-    100%{opacity:0;transform:translateY(16px) scale(.6)}
-  }
 
   @media (max-width:360px){
-    .viz{width:82px;right:12px}
+    .target,.clock{font-size:60px}
+    .hTime{padding-left:16px}
+    .hMain{padding-right:14px}
     .cue,.target,.sub2{padding-right:92px}
   }
-  .cue{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);transition:color 260ms}
+  .heroTop{display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:start}
+  .hMain{min-width:0;padding-right:22px}
+  /* divider is a short rule between the two readings, not a full-height border */
+  .hTime{position:relative;min-width:0;padding-left:24px}
+  .hTime:before{content:"";position:absolute;left:0;top:4px;bottom:14px;width:1px;
+    background:#26262C;transition:background 200ms}
+  .stage.pour .hTime:before{background:#4A3A2E}
+  .stage.stop .hTime:before{background:#4A2A26}
+  .hTime .lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);
+    margin-bottom:6px;font-weight:500}
+  .heroBot{margin-top:22px;padding-top:18px;border-top:1px solid #222228;transition:border-color 200ms}
+  .stage.pour .hTime,.stage.pour .heroBot{border-color:#4A3A2E}
+  .stage.stop .hTime,.stage.stop .heroBot{border-color:#4A2A26}
+  .cue{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);
+    font-weight:500;margin-bottom:6px;transition:color 260ms}
   .stage.pour .cue{color:var(--hot)}
   .stage.stop .cue{color:var(--over)}
 
   /* the number that matters */
-  .target{font-size:108px;font-weight:600;line-height:.92;letter-spacing:-.045em;
-    margin:8px 0 0;transition:color 120ms;font-feature-settings:"tnum";will-change:contents}
-  .target em{font-size:26px;font-weight:400;font-style:normal;color:var(--mute);margin-left:6px;letter-spacing:0}
+  .target{font-size:84px;font-weight:600;line-height:.9;letter-spacing:-.045em;
+    margin:0;transition:color 120ms;font-feature-settings:"tnum";will-change:contents}
+  .target em{font-size:22px;font-weight:400;font-style:normal;color:var(--mute);margin-left:6px;letter-spacing:0}
   .stage.pour .target{color:var(--hot)}
   .stage.stop .target{color:var(--over)}
-  .sub2{font-size:14px;color:var(--mute);min-height:19px;line-height:1.35;margin-top:8px}
+  .sub2{font-size:14px;color:var(--mute);min-height:19px;line-height:1.4;margin-top:14px}
 
   /* pour progress toward the current target */
-  .tracklab{display:flex;align-items:baseline;justify-content:space-between;margin:20px 0 7px}
+  .tracklab{display:flex;align-items:baseline;justify-content:space-between;margin:0 0 8px}
   .tracklab b{font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--mute);font-weight:600}
   .tracklab span{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
   .stage.pour .tracklab b,.stage.pour .tracklab span{color:#C9A389}
@@ -117,14 +107,9 @@
   .gauge i{flex:1;background:#242428;border-radius:3px;transition:background 200ms}
   .gauge i.on{background:#55555C}
 
-  .clockrow{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
-    margin-top:18px;padding-top:14px;border-top:1px solid #222228}
-  .clockwrap{display:flex;flex-direction:column}
-  .clockwrap .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
-    color:var(--mute);margin-bottom:3px}
-  .clock{font-size:46px;font-weight:600;color:var(--ink);letter-spacing:-.035em;line-height:.95}
+  .clock{font-size:84px;font-weight:600;color:var(--ink);letter-spacing:-.035em;line-height:.95}
   .stage.pour .clock,.stage.stop .clock{color:#F4F4F2}
-  .of{font-size:13px;color:var(--mute);letter-spacing:.03em;padding-bottom:5px;text-align:right}
+  .of{font-size:12.5px;color:var(--mute);letter-spacing:.03em;margin-top:9px;line-height:1.35}
   .bigTap{position:relative;display:inline-block}
   .bigHint{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
     color:#5A5A62;margin-top:4px}
@@ -481,10 +466,9 @@
     .colA{position:sticky;top:calc(78px + env(safe-area-inset-top))}
 
     .inner{padding:30px 30px 26px}
-    .viz{width:150px;right:26px;top:24px}
     .cue,.target,.sub2{padding-right:170px}
     .cue{font-size:13px;letter-spacing:.16em}
-    .target{font-size:148px;letter-spacing:-.05em}
+    .target,.clock{font-size:104px;letter-spacing:-.05em}
     .target em{font-size:34px}
     .sub2{font-size:17px;min-height:24px}
     .track{height:14px;border-radius:8px}
@@ -492,7 +476,7 @@
     .tracklab b,.gaugelab{font-size:12px}
     .tracklab span{font-size:15px}
     .gauge{height:7px}
-    .clock{font-size:62px}
+
     .of{font-size:14.5px}
 
     .live dd{font-size:42px}
@@ -533,7 +517,7 @@
 
   /* landscape tablet: shorter viewport, so the hero gives back some height */
   @media (min-width:900px) and (max-height:760px){
-    .target{font-size:116px}
+    .target,.clock{font-size:84px}
     .inner{padding:24px 28px 22px}
     .colA{position:static}
   }
@@ -592,7 +576,6 @@
 
   @media (prefers-reduced-motion:reduce){
     *{animation:none !important;transition:none !important}
-    .stage.pour .vStream{opacity:.9}
   }
 </style>
 </head>
@@ -616,43 +599,26 @@
   <div class="stage" id="stage">
     <div class="flood"></div>
     <div class="inner">
-      <svg class="viz" id="viz" viewBox="0 0 120 168" aria-hidden="true">
-        <defs>
-          <clipPath id="srvClip"><path d="M26 104 h68 v34 a10 10 0 0 1 -10 10 h-48 a10 10 0 0 1 -10 -10 z"/></clipPath>
-          <clipPath id="coneClip"><path d="M18 22 h84 l-38 62 a8 8 0 0 1 -8 0 z"/></clipPath>
-        </defs>
+      <div class="heroTop">
+        <div class="hMain">
+          <div class="cue" id="cue">Ready</div>
+          <div class="target" id="big" aria-live="polite" role="button" tabindex="0">0<em>g</em></div>
+          <div class="bigHint" id="bigHint"></div>
+        </div>
+        <div class="hTime">
+          <div class="lbl" id="clockLbl">Elapsed</div>
+          <div class="clock" id="clock">0:00</div>
+          <div class="of" id="of"></div>
+        </div>
+      </div>
 
-        <!-- kettle stream: only while a pour is open -->
-        <line class="vStream" x1="60" y1="2" x2="60" y2="24"/>
+      <div class="sub2" id="sub">Bloom starts the moment you hit start.</div>
 
-        <!-- cone -->
-        <path class="vCone" d="M18 22 h84 l-38 62 a8 8 0 0 1 -8 0 z"/>
-        <g clip-path="url(#coneClip)">
-          <rect class="vBed" x="14" y="52" width="92" height="40"/>
-          <rect class="vSlurry" id="vSlurry" x="14" y="52" width="92" height="0"/>
-        </g>
-
-        <!-- drip during drawdown -->
-        <circle class="vDrip" cx="60" cy="90" r="2.4"/>
-
-        <!-- server -->
-        <path class="vSrv" d="M26 104 h68 v34 a10 10 0 0 1 -10 10 h-48 a10 10 0 0 1 -10 -10 z"/>
-        <g clip-path="url(#srvClip)">
-          <rect class="vFill" id="vFill" x="26" y="148" width="68" height="0"/>
-        </g>
-      </svg>
-      <div class="cue" id="cue">Ready</div>
-      <div class="target" id="big" aria-live="polite" role="button" tabindex="0">0<em>g</em></div>
-      <div class="bigHint" id="bigHint"></div>
-      <div class="sub2" id="sub">Tare with the brewer on, then start.</div>
-      <div class="tracklab"><b id="trackName">This pour</b><span id="trackVal"></span></div>
-      <div class="track"><i id="fill"></i></div>
-      <div class="gaugelab" id="gaugeLab">Recipe</div>
-      <div class="gauge" id="gauge"></div>
-      <div class="clockrow">
-        <span class="clockwrap"><span class="lbl" id="clockLbl">Elapsed</span>
-        <span class="clock" id="clock">0:00</span></span>
-        <span class="of" id="of"></span>
+      <div class="heroBot">
+        <div class="tracklab"><b id="trackName">This pour</b><span id="trackVal"></span></div>
+        <div class="track"><i id="fill"></i></div>
+        <div class="gaugelab" id="gaugeLab">Recipe</div>
+        <div class="gauge" id="gauge"></div>
       </div>
     </div>
   </div>
@@ -1303,31 +1269,7 @@ function paint(){
                               : "Leave it alone. Target "+mmss(cur.drawdown)+".";
     of = "total "+mmss(cur.drawdown);
   }
-  /* drawdown needs its own class so the drip can run */
-  if(f.kind === "draw") cls += " draw";
   setCls(st, "stageCls", cls);
-  setText("clockLbl", cur.free ? (inPour ? "Pouring" : "Elapsed") : "Elapsed");
-  setText("bigHint", cur.free ? "total in the cup"
-    : (f.kind === "pour" ? (countUp ? "poured \u00b7 tap to flip" : "left to pour \u00b7 tap to flip") : ""));
-
-  /* server level = cumulative water actually in the cup */
-  var tot = cur.free ? Math.max(60, weight) : sc(cur.steps[cur.steps.length-1][1]);
-  var got = !running ? 0 : (linked ? Math.max(0, weight) : (f.i >= 0 ? f.target : 0));
-  var lvl = Math.max(0, Math.min(1, got / Math.max(1, tot)));
-  var SH = 44, sy = (148 - SH*lvl).toFixed(1);
-  if(prev.vFill !== sy){
-    prev.vFill = sy;
-    el("vFill").setAttribute("y", sy);
-    el("vFill").setAttribute("height", (SH*lvl).toFixed(1));
-  }
-  /* slurry sits in the cone only while water is above the bed */
-  var wet = (f.kind === "pour") ? 1 : (f.kind === "hold" ? .45 : 0);
-  var CH = 26, cy = (78 - CH*wet).toFixed(1);
-  if(prev.vSlurry !== cy){
-    prev.vSlurry = cy;
-    el("vSlurry").setAttribute("y", cy);
-    el("vSlurry").setAttribute("height", (CH*wet).toFixed(1));
-  }
   setText("cue", cue); setHTML("big", bigHTML); setText("sub", sub); setText("of", of);
 
   if(stepEls.length){
