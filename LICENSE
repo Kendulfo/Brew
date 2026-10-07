@@ -1,0 +1,28 @@
+Copyright © 2026 Kenneth Dulfo. All rights reserved.
+
+This software and its accompanying design, interface, copy, and
+documentation are the property of Kenneth Dulfo.
+
+Permission is granted to view and run this software for personal,
+non-commercial use.
+
+You may not, without prior written permission from the copyright holder:
+
+  - copy, reproduce, or redistribute the source code, in whole or in part
+  - modify this software or create derivative works from it
+  - use it, or any part of it, in a commercial product or service
+  - remove or alter this notice or any copyright attribution
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+TIMEMORE and Black Mirror are trademarks of their respective owner. This
+project is an independent work and is not affiliated with, endorsed by,
+or sponsored by TIMEMORE. It communicates with the scale using the
+manufacturer's own publicly published BLE protocol specification.
+
+Contact: mynameiskennethdulfo.com
