@@ -1350,7 +1350,16 @@ function cues(f){
   for(var i=0;i<cur.steps.length;i++){
     var at = cur.steps[i][0];
     if(clk >= at-3 && clk < at && !cued["pre"+i]){ cued["pre"+i] = 1; tone("ready"); }
-    if(clk >= at && !cued["go"+i]){ cued["go"+i] = 1; if(i > 0 || clk > 0) tone("pour"); }
+    if(clk >= at && !cued["go"+i]){
+      cued["go"+i] = 1;
+      /* the previous pour never hit its number before this one opened —
+         record how short it fell rather than leaving a blank */
+      if(i > 0 && linked && hits[i-1] == null){
+        hits[i-1] = weight - sc(cur.steps[i-1][1]);
+        cued["hit"+(i-1)] = 1;
+      }
+      if(i > 0 || clk > 0) tone("pour");
+    }
   }
 
   /* approach: pips that quicken as the target nears.
@@ -1368,9 +1377,14 @@ function cues(f){
     }
   }
 
-  if((f.kind === "hold" || f.kind === "draw") && !cued["hit"+f.i]){
-    cued["hit"+f.i] = 1;
-    if(linked){ hits[f.i] = weight - f.target; tone("stop"); }
+  if(f.kind === "hold" || f.kind === "draw"){
+    if(linked){
+      /* keep updating while the pour settles — the overshoot lands AFTER the
+         scale crosses the target, so recording once at the crossing was
+         reporting every over-pour as exact */
+      hits[f.i] = weight - f.target;
+    }
+    if(!cued["hit"+f.i]){ cued["hit"+f.i] = 1; if(linked) tone("stop"); }
   }
   if(clk >= cur.drawdown && !cued.done){ cued.done = 1; tone("done"); openSheet(); }
 }
@@ -1644,9 +1658,9 @@ function renderLog(){
       else if(e.pours && e.pours.length){
         pours = '<div class="lgHead">Every pour</div><ul class="lgPours">'+
           e.pours.map(function(p,n){
-            var m = p.miss == null ? '<span class="lgNo">\u2014</span>'
+            var m = p.miss == null ? '<span class="lgNo">not reached</span>'
               : '<span class="lgMiss '+(Math.abs(p.miss) <= 1 ? "ok" : Math.abs(p.miss) <= 3 ? "mid" : "bad")+'">'+
-                (p.miss > 0 ? "+" : "")+p.miss.toFixed(1)+'</span>';
+                (Math.abs(p.miss) < 0.05 ? "exact" : (p.miss > 0 ? "+" : "\u2212")+Math.abs(p.miss).toFixed(1)+" g")+'</span>';
             return '<li><span class="lp">'+mmss(p.at)+'</span><span class="lg2">'+p.target+' g</span>'+
                    '<span class="ln">'+(p.note || "pour "+(n+1))+'</span>'+m+'</li>';
           }).join("")+'</ul>';
