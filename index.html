@@ -940,7 +940,8 @@ function note(f, start, ms, vol){
 /* four voices, deliberately unalike so you can tell them apart without looking */
 function tone(kind){
   unlock();
-  if(kind === "ready"){ note(700,0,90,.32); }                                  // 3s out: single tap
+  if(kind === "tick"){ note(1500,0,38,.34); }                                   // approach pip
+  else if(kind === "ready"){ note(700,0,90,.32); }                                  // 3s out: single tap
   else if(kind === "pour"){ note(660,0,130,.6); note(990,.13,190,.6); }        // GO: rising pair
   else if(kind === "soon"){ note(1180,0,70,.5); note(1180,.1,70,.5); note(1180,.2,70,.5); } // ease off: triple
   else if(kind === "stop"){ note(440,0,120,.6); note(300,.1,260,.55); }        // target hit: falling
@@ -1128,7 +1129,8 @@ function paint(){
     }
   } else if(f.kind === "pour"){
     if(linked){
-      var near = f.left <= 5;
+      var band = Math.max(4, Math.max(1.5, flow) * 2.5);
+      var near = f.left <= band;
       cls = (near && f.left <= 1.2) ? "stage stop" : "stage pour";
       cue = near ? "Ease off — left" : "Pour — left";
       bigHTML = f.left.toFixed(f.left < 10 ? 1 : 0)+'<em>g</em>';
@@ -1198,18 +1200,30 @@ function paint(){
   cues(f);
 }
 
+var lastTick = 0;
 function cues(f){
   if(!running) return;
-  /* step-open cues come straight off the clock. the old version read them out
-     of the hold branch, so once a pour opened the GO cue never fired. */
   for(var i=0;i<cur.steps.length;i++){
     var at = cur.steps[i][0];
     if(clk >= at-3 && clk < at && !cued["pre"+i]){ cued["pre"+i] = 1; tone("ready"); }
     if(clk >= at && !cued["go"+i]){ cued["go"+i] = 1; if(i > 0 || clk > 0) tone("pour"); }
   }
-  if(f.kind === "pour" && linked && f.left <= 4 && !cued["near"+f.i]){
-    cued["near"+f.i] = 1; tone("soon");
+
+  /* approach: pips that quicken as the target nears.
+     the window is time-based, not a fixed number of grams — 4 g of warning
+     is two seconds at a trickle and half a second at full pour, so the band
+     is sized from your actual flow and never shorter than ~2.5 s of coasting. */
+  if(f.kind === "pour" && linked){
+    var rate = Math.max(1.5, flow);
+    var band = Math.max(4, rate * 2.5);
+    if(f.left <= band && f.left > 0){
+      var near = 1 - (f.left / band);                 // 0 at the edge, 1 at the target
+      var gap  = 620 - near * 500;                    // 620ms out to ~120ms on arrival
+      var now  = Date.now();
+      if(now - lastTick >= gap){ lastTick = now; tone("tick"); }
+    }
   }
+
   if((f.kind === "hold" || f.kind === "draw") && !cued["hit"+f.i]){
     cued["hit"+f.i] = 1;
     if(linked){ hits[f.i] = weight - f.target; tone("stop"); }
