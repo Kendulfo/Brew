@@ -117,9 +117,17 @@
   .gauge i{flex:1;background:#242428;border-radius:3px;transition:background 200ms}
   .gauge i.on{background:#55555C}
 
-  .clockrow{display:flex;align-items:baseline;justify-content:space-between;margin-top:16px}
-  .clock{font-size:22px;font-weight:500;color:var(--mute);letter-spacing:-.01em}
-  .of{font-size:12.5px;color:var(--mute);letter-spacing:.04em}
+  .clockrow{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+    margin-top:18px;padding-top:14px;border-top:1px solid #222228}
+  .clockwrap{display:flex;flex-direction:column}
+  .clockwrap .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--mute);margin-bottom:3px}
+  .clock{font-size:46px;font-weight:600;color:var(--ink);letter-spacing:-.035em;line-height:.95}
+  .stage.pour .clock,.stage.stop .clock{color:#F4F4F2}
+  .of{font-size:13px;color:var(--mute);letter-spacing:.03em;padding-bottom:5px;text-align:right}
+  .bigTap{position:relative;display:inline-block}
+  .bigHint{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:#5A5A62;margin-top:4px}
 
   @keyframes tick{0%{transform:scale(1.03)}100%{transform:scale(1)}}
   @keyframes urge{0%{transform:scale(1.08)}60%{transform:scale(.995)}100%{transform:scale(1)}}
@@ -342,13 +350,24 @@
   .ewarn{background:#1C0F0E;border:1px solid var(--over);border-radius:12px;padding:12px 14px;
     font-size:13px;color:#FF8E86;line-height:1.5;margin-top:10px}
   .ewarn button{color:var(--hot);font-weight:600;text-decoration:underline}
-  .newBtn{width:100%;padding:17px;border-radius:14px;background:var(--hot);border:0;
-    color:#0A0A0B;font-size:16px;font-weight:600;margin-bottom:6px;letter-spacing:-.01em;
-    display:flex;align-items:center;justify-content:center;gap:9px;transition:transform 120ms}
-  .newBtn:active{transform:scale(.985)}
-  .newBtn i{font-style:normal;font-size:20px;line-height:1;font-weight:400}
-  .newHint{font-size:12.5px;color:var(--mute);line-height:1.45;margin-bottom:20px;text-align:center}
-  .cardGrid{display:grid;gap:9px}
+  .startGrid{display:grid;gap:9px;margin-bottom:4px}
+  .startCard{display:flex;flex-direction:column;gap:7px;width:100%;text-align:left;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;
+    transition:border-color 200ms,background 200ms}
+  .scCta{margin-top:auto;padding-top:12px;display:inline-flex;align-items:center;
+    justify-content:center;width:100%;border-radius:11px;font-size:14px;font-weight:600}
+  .startCard .scCta{background:#1D1D21;border:1px solid var(--line);color:var(--ink);
+    padding:12px;margin-top:12px;transition:background 180ms,border-color 180ms}
+  .startCard .scCta.hot{background:var(--hot);border-color:var(--hot);color:#0A0A0B}
+  .startCard.on .scCta{border-color:var(--hot);color:var(--hot)}
+  .startCard.on{border-color:var(--hot)}
+  .startCard.accent{border-color:rgba(255,106,31,.45);background:#16120F}
+  .startCard.accent b{color:var(--hot)}
+  .scTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .startCard b{font-size:15.5px;font-weight:600}
+
+  .scTxt{font-size:12.5px;color:var(--mute);line-height:1.45}
+  .lgGaps{font-size:11.5px;color:var(--mute);line-height:1.5;margin-top:9px}
   .cardEdit{position:absolute;top:13px;right:13px;font-size:12px;color:var(--mute);
     border:1px solid var(--line);border-radius:100px;padding:6px 11px}
   .card{position:relative}
@@ -401,7 +420,7 @@
 
   .tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0A0A0B;border-top:1px solid var(--line);
     padding-bottom:env(safe-area-inset-bottom);max-width:560px;margin:0 auto;z-index:3}
-  .tabs button{flex:1;padding:16px 0 17px;font-size:12.5px;color:var(--mute);letter-spacing:.03em}
+  .tabs button{flex:1;padding:16px 2px 17px;font-size:11.5px;color:var(--mute);letter-spacing:.01em;white-space:nowrap}
   .tabs button[aria-selected="true"]{color:var(--hot);font-weight:600}
 
   /* ===================== tablet ===================== */
@@ -415,7 +434,7 @@
     .tabs{top:0;bottom:auto;border-top:none;border-bottom:1px solid var(--line);
       max-width:none;padding:0 28px;padding-top:env(safe-area-inset-top);
       justify-content:center;gap:6px;backdrop-filter:blur(12px);background:rgba(10,10,11,.86)}
-    .tabs button{flex:0 0 auto;padding:19px 22px;font-size:14px}
+    .tabs button{flex:0 0 auto;padding:19px 20px;font-size:14px}
     .tabs button[aria-selected="true"]{box-shadow:inset 0 -2px 0 var(--hot)}
 
     .hdr{display:flex;align-items:center;justify-content:space-between;gap:24px;
@@ -444,8 +463,8 @@
     .tracklab b,.gaugelab{font-size:12px}
     .tracklab span{font-size:15px}
     .gauge{height:7px}
-    .clock{font-size:28px}
-    .of{font-size:13.5px}
+    .clock{font-size:62px}
+    .of{font-size:14.5px}
 
     .live dd{font-size:42px}
     .live div{padding:18px 20px}
@@ -474,8 +493,7 @@
     .cardGrid{grid-template-columns:1fr 1fr;gap:12px}
     .card{display:flex;flex-direction:column}
     .card .desc{margin-top:auto;padding-top:7px}
-    .newBtn{max-width:420px;margin:0 auto 6px;padding:18px}
-    .newHint{margin-bottom:26px}
+    .startGrid{grid-template-columns:1fr 1fr;gap:12px}
     .sec{margin:26px 0 12px}
     #pScale .scaleWrap{max-width:620px;margin:8px auto 0;padding:58px 24px 32px}
     .scaleNum{font-size:132px}
@@ -523,6 +541,8 @@
   .log .del:active,.rmBtn:active{background:#2A1715;border-color:#5A3029}
 
   @media (hover:hover) and (pointer:fine){
+    .startCard:hover .scCta{background:#26262C;border-color:#43434C}
+    .startCard:hover .scCta.hot{background:#FF7A33;border-color:#FF7A33}
     .ehead button:hover,.gh:hover,.dose button:hover,.ctl button:hover,
     .estep button:hover,.scaleBtns .sghost:hover,.taste button:hover,
     .mode button:not([aria-pressed="true"]):hover{background:#26262C;border-color:#43434C}
@@ -594,13 +614,18 @@
         </g>
       </svg>
       <div class="cue" id="cue">Ready</div>
-      <div class="target" id="big" aria-live="polite">0<em>g</em></div>
+      <div class="target" id="big" aria-live="polite" role="button" tabindex="0">0<em>g</em></div>
+      <div class="bigHint" id="bigHint"></div>
       <div class="sub2" id="sub">Tare with the brewer on, then start.</div>
       <div class="tracklab"><b id="trackName">This pour</b><span id="trackVal"></span></div>
       <div class="track"><i id="fill"></i></div>
       <div class="gaugelab" id="gaugeLab">Recipe</div>
       <div class="gauge" id="gauge"></div>
-      <div class="clockrow"><span class="clock" id="clock">0:00</span><span class="of" id="of"></span></div>
+      <div class="clockrow">
+        <span class="clockwrap"><span class="lbl" id="clockLbl">Elapsed</span>
+        <span class="clock" id="clock">0:00</span></span>
+        <span class="of" id="of"></span>
+      </div>
     </div>
   </div>
 
@@ -735,6 +760,7 @@
 
 <nav class="tabs">
   <button id="tBrew" aria-selected="true">Brew</button>
+  <button id="tFree" aria-selected="false">Freestyle</button>
   <button id="tScale" aria-selected="false">Scale</button>
   <button id="tList" aria-selected="false">Recipes</button>
   <button id="tLog" aria-selected="false">Log</button>
@@ -845,6 +871,11 @@ Scale.prototype._frame = function(f){
 };
 
 /* ---------- recipes: [atSeconds, cumulativeGrams, note] ---------- */
+var FREESTYLE = { id:"freestyle", name:"Freestyle", by:"No recipe", free:true,
+  dose:15, water:0, temp:"your call", grind:"your setting", drawdown:0, steps:[],
+  desc:"No targets. Start pouring and it records every pour, every pause, and the flow rate of each.",
+  foot:"<p>The app watches the scale and marks a pour whenever water starts and stops. Tap Finish when you are done and it all goes to the log.</p>" };
+
 var RECIPES = [
   { id:"ken-hot", name:"V60 — my daily", by:"Kenneth", dose:15, water:225, temp:"94 °C", grind:"just under 80 · DF54", drawdown:210,
     desc:"Five pours, 45s apart, swirl at the fourth.",
@@ -889,6 +920,9 @@ var cur = RECIPES[0], doses = {}, log = [], taste = null;
 var clk = 0, running = false, ticker = null, t0 = 0;        // clock fallback
 var weight = 0, flow = 0, batt = null, linked = false;
 var hits = {}, cued = {}, lastKind = "", scale = null;
+var lastRecipe = null;
+var countUp = false;                    // cafe 1: brewers used to watching weight rise
+var segs = [], inPour = false, seg = null, quiet = 0;
 var auto = true, armed = false, armBase = 0;
 
 var $ = function(id){ return document.getElementById(id); };
@@ -903,9 +937,9 @@ var dose = function(){ return doses[cur.id] || cur.dose; };
 var sc = function(g){ return Math.round(g * dose() / cur.dose); };
 
 try{ var sp = localStorage.getItem("brew:prefs"); if(sp){ var v = JSON.parse(sp);
-  doses = v.doses||{}; if(v.auto === false) auto = false; var r = RECIPES.filter(function(x){return x.id===v.id;})[0]; if(r) cur = r; } }catch(e){}
+  doses = v.doses||{}; if(v.auto === false) auto = false; if(v.up) countUp = true; if(v.id === "freestyle") cur = FREESTYLE; else { var r = RECIPES.filter(function(x){return x.id===v.id;})[0]; if(r) cur = r; } } }catch(e){}
 try{ var sl = localStorage.getItem("brew:log"); if(sl) log = JSON.parse(sl)||[]; }catch(e){}
-function savePrefs(){ try{ localStorage.setItem("brew:prefs", JSON.stringify({id:cur.id,doses:doses,auto:auto})); }catch(e){} }
+function savePrefs(){ try{ localStorage.setItem("brew:prefs", JSON.stringify({id:cur.id,doses:doses,auto:auto,up:countUp})); }catch(e){} }
 function saveLog(){ try{ localStorage.setItem("brew:log", JSON.stringify(log.slice(0,60))); }catch(e){} }
 
 /* ---------- cues ---------- */
@@ -992,6 +1026,26 @@ var win = [];
 function onData(d){
   weight = d.weight; flow = d.flow;
   win.push(d.weight); if(win.length > 8) win.shift();
+
+  /* freestyle: a pour starts when water moves and ends when it stops.
+     five quiet samples (~0.5s) to close, so a wobble mid-pour doesn't
+     split one pour into two. */
+  if(cur.free && running && linked){
+    if(!inPour && d.flow >= 1.0){
+      inPour = true; quiet = 0;
+      seg = { t0:clk, w0:+d.weight.toFixed(1), peak:d.flow };
+    } else if(inPour && seg){
+      if(d.flow > seg.peak) seg.peak = d.flow;
+      quiet = (d.flow < 0.4) ? quiet + 1 : 0;
+      if(quiet >= 5){
+        inPour = false; quiet = 0;
+        seg.t1 = clk; seg.w1 = +d.weight.toFixed(1);
+        seg.add = +(seg.w1 - seg.w0).toFixed(1);
+        if(seg.add >= 2){ segs.push(seg); tone("stop"); }
+        seg = null;
+      }
+    }
+  }
   /* armed: tared, brewer on the scale, waiting for the bloom to land.
      2 g over the tare point is past any bump or breeze, and well under a bloom. */
   if(armed && !running && (d.weight - armBase) >= 2){ armed = false; beginRun(); }
@@ -1061,6 +1115,7 @@ el("sDose").onclick = function(){
 
 /* ---------- phase: weight-driven when linked, time-driven when not ---------- */
 function phase(){
+  if(cur.free) return { kind: running ? (inPour ? "fpour" : "frec") : "pre", i:-1 };
   var S = cur.steps, i = -1;
   for(var k=0;k<S.length;k++){ if(clk >= S[k][0]) i = k; }
   if(!running || i < 0) return {kind:"pre"};
@@ -1081,28 +1136,44 @@ function paint(){
   var f = phase(), st = el("stage"), big = el("big");
   setText("clock", mmss(clk));
 
-  var n = cur.steps.length;
-  if(pipEls.length !== n){
+  var n = cur.free ? Math.max(1, segs.length) : cur.steps.length;
+  if(cur.free){
+    if(prev.fsPips !== segs.length){
+      prev.fsPips = segs.length;
+      var g2 = ""; for(var q=0;q<Math.max(1,segs.length);q++) g2 += '<i class="' + (segs.length?'on':'') + '"></i>';
+      el("gauge").innerHTML = g2;
+      pipEls = [].slice.call(el("gauge").children);
+    }
+    var p2 = (Math.min(1, flow/10)*100).toFixed(1)+"%";
+    if(prev.fill !== p2){ prev.fill = p2; el("fill").style.width = p2; }
+    setText("trackName", inPour ? "Flow" : "Flow \u2014 idle");
+    setText("trackVal", linked ? flow.toFixed(1)+" g/s" : "no scale");
+    setText("gaugeLab", segs.length ? segs.length+" pours recorded" : "No pours yet");
+  }
+  if(!cur.free && pipEls.length !== n){
     var g = ""; for(var k=0;k<n;k++) g += "<i></i>";
     el("gauge").innerHTML = g;
     pipEls = [].slice.call(el("gauge").children);
   }
-  for(var k=0;k<n;k++){
+  if(!cur.free) for(var k=0;k<n;k++){
     var on = (f.i >= k && running) ? "on" : "";
-    if(pipEls[k].className !== on) pipEls[k].className = on;
+    if(pipEls[k] && pipEls[k].className !== on) pipEls[k].className = on;
   }
 
   var fw = 0;
-  if(running && f.i >= 0){
+  if(!cur.free && running && f.i >= 0){
     var prevT = f.i > 0 ? sc(cur.steps[f.i-1][1]) : 0;
     fw = linked ? (weight - prevT) / Math.max(1, f.target - prevT)
                 : (f.kind === "pour" ? .5 : 1);
   }
-  var pct = (Math.max(0, Math.min(1, fw)) * 100).toFixed(1) + "%";
-  if(prev.fill !== pct){ prev.fill = pct; el("fill").style.width = pct; }
+  if(!cur.free){
+    var pct = (Math.max(0, Math.min(1, fw)) * 100).toFixed(1) + "%";
+    if(prev.fill !== pct){ prev.fill = pct; el("fill").style.width = pct; }
+  }
 
   /* say what the bar is measuring — it is this pour, not the whole brew */
-  if(!running || f.i < 0){
+  if(cur.free){ /* handled above */ }
+  else if(!running || f.i < 0){
     setText("trackName", "This pour");
     setText("trackVal", linked ? "waiting" : "not started");
   } else {
@@ -1112,29 +1183,50 @@ function paint(){
       ? Math.max(from, Math.round(weight)) + " → " + f.target + " g"
       : from + " → " + f.target + " g");
   }
-  setText("gaugeLab", running && f.i >= 0
+  if(!cur.free) setText("gaugeLab", running && f.i >= 0
     ? "Recipe · " + (f.i+1) + "/" + n + " pours done"
     : "Recipe · " + n + " pours");
 
   var cls = "stage", cue, bigHTML, sub, of;
   if(f.kind === "pre"){
-    if(armed){
-      cue = "Armed — start pouring"; bigHTML = sc(cur.steps[0][1])+'<em>g</em>';
+    var first = (cur.steps && cur.steps.length) ? sc(cur.steps[0][1]) + "" : "0";
+    if(cur.free){
+      cue = "Ready to record";
+      bigHTML = (linked ? weight.toFixed(1) : "0.0")+'<em>g</em>';
+      sub = linked ? "Start, then pour however you like \u2014 every pour gets logged."
+                   : "Connect the Dot to record pours and flow.";
+      of = "";
+    } else if(armed){
+      cue = "Armed \u2014 start pouring"; bigHTML = first+'<em>g</em>';
       sub = "Clock starts itself when water hits the bed."; of = "auto-start";
     } else {
-      cue = "Ready"; bigHTML = sc(cur.steps[0][1])+'<em>g</em>'; of = "";
+      cue = "Ready"; bigHTML = first+'<em>g</em>'; of = "";
       sub = linked ? (auto ? "Brewer and coffee on the scale, then arm it."
                            : "Tare with the brewer on, then start.")
                    : "Bloom starts the moment you hit start.";
     }
+  } else if(f.kind === "fpour" || f.kind === "frec"){
+    cls = f.kind === "fpour" ? "stage pour" : "stage";
+    cue = f.kind === "fpour" ? "Pouring" : (segs.length ? "Between pours" : "Ready when you are");
+    bigHTML = (linked ? weight.toFixed(1) : "0.0")+'<em>g</em>';
+    sub = segs.length
+      ? segs.length+" pour"+(segs.length>1?"s":"")+" recorded \u00b7 last +"+segs[segs.length-1].add+" g"
+      : "Start pouring whenever you like.";
+    of = linked ? flow.toFixed(1)+" g/s" : "no scale";
   } else if(f.kind === "pour"){
     if(linked){
       var band = Math.max(4, Math.max(1.5, flow) * 2.5);
       var near = f.left <= band;
       cls = (near && f.left <= 1.2) ? "stage stop" : "stage pour";
-      cue = near ? "Ease off — left" : "Pour — left";
-      bigHTML = f.left.toFixed(f.left < 10 ? 1 : 0)+'<em>g</em>';
-      sub = (f.step[2] || "Steady circles.") + " · to " + f.target + " g";
+      if(countUp){
+        cue = near ? "Ease off \u2014 stop at "+f.target : "Pour to "+f.target;
+        bigHTML = weight.toFixed(weight < 100 ? 1 : 0)+'<em>g</em>';
+        sub = (f.step[2] || "Steady circles.") + " \u00b7 " + f.left.toFixed(f.left < 10 ? 1 : 0)+" g to go";
+      } else {
+        cue = near ? "Ease off \u2014 left" : "Pour \u2014 left";
+        bigHTML = f.left.toFixed(f.left < 10 ? 1 : 0)+'<em>g</em>';
+        sub = (f.step[2] || "Steady circles.") + " \u00b7 to " + f.target + " g";
+      }
       if(f.step[3]){
         var prevG = f.i > 0 ? sc(cur.steps[f.i-1][1]) : 0;
         var aim = (f.target - prevG) / f.step[3];
@@ -1143,7 +1235,7 @@ function paint(){
       }
       if(near) anim(big, "urge", "near"+f.i);
     } else {
-      cls = "stage pour"; cue = "Pour now — to";
+      cls = "stage pour"; cue = "Pour now \u2014 to";
       bigHTML = f.target+'<em>g</em>'; sub = f.step[2] || "Steady circles. Keep the bed level.";
     }
     of = "pour "+(f.i+1)+" of "+n;
@@ -1165,9 +1257,12 @@ function paint(){
   /* drawdown needs its own class so the drip can run */
   if(f.kind === "draw") cls += " draw";
   setCls(st, "stageCls", cls);
+  setText("clockLbl", cur.free ? (inPour ? "Pouring" : "Elapsed") : "Elapsed");
+  setText("bigHint", cur.free ? "total in the cup"
+    : (f.kind === "pour" ? (countUp ? "poured \u00b7 tap to flip" : "left to pour \u00b7 tap to flip") : ""));
 
   /* server level = cumulative water actually in the cup */
-  var tot = sc(cur.steps[cur.steps.length-1][1]);
+  var tot = cur.free ? Math.max(60, weight) : sc(cur.steps[cur.steps.length-1][1]);
   var got = !running ? 0 : (linked ? Math.max(0, weight) : (f.i >= 0 ? f.target : 0));
   var lvl = Math.max(0, Math.min(1, got / Math.max(1, tot)));
   var SH = 44, sy = (148 - SH*lvl).toFixed(1);
@@ -1202,7 +1297,7 @@ function paint(){
 
 var lastTick = 0;
 function cues(f){
-  if(!running) return;
+  if(!running || cur.free) return;
   for(var i=0;i<cur.steps.length;i++){
     var at = cur.steps[i][0];
     if(clk >= at-3 && clk < at && !cued["pre"+i]){ cued["pre"+i] = 1; tone("ready"); }
@@ -1245,11 +1340,15 @@ function loop(){
 }
 async function beginRun(resume){
   running = true; if(!resume) tone("pour");
-  $("run").textContent = "Pause"; $("run").className = "go on";   // before any await
-  if(linked){ await scale.start(); if(!resume) clk = 0; }
+  /* zero the clock BEFORE any await — tare and start are BLE round-trips, and
+     a notification landing mid-flight used to get wiped by a late reset */
+  if(!resume){ clk = 0; }
+  $("run").textContent = runLabel(); $("run").className = "go on";
+  if(cur.free && !resume && linked) await scale.tare();
+  if(linked){ await scale.start(); }
   else { t0 = Date.now() - clk*1000; }
   rafOn = false; loop();
-  $("run").textContent = "Pause"; $("run").className = "go on";
+  $("run").textContent = runLabel(); $("run").className = "go on";
   try{ if("wakeLock" in navigator) navigator.wakeLock.request("screen"); }catch(e){}
   paint();
 }
@@ -1257,24 +1356,38 @@ $("run").onclick = async function(){
   unlock();
   if(running){
     running = false; rafOn = false; clearInterval(ticker);
-    $("run").className = "go on"; drawMode();
     if(linked) await scale.pause(); else t0 = Date.now() - clk*1000;
+    if(cur.free){
+      if(inPour && seg){                      // close a pour still in progress
+        inPour = false; seg.t1 = clk; seg.w1 = +weight.toFixed(1);
+        seg.add = +(seg.w1 - seg.w0).toFixed(1);
+        if(seg.add >= 2) segs.push(seg);
+        seg = null;
+      }
+      tone("done"); $("saveBox").className = "save";
+    }
+    $("run").className = "go on"; drawMode(); paint();
     return;
   }
   if(armed){ armed = false; $("run").textContent = runLabel(); drawMode(); paint(); return; }
   /* paused mid-brew: resume where we left off — never re-tare, that would
      zero the water already in the cone */
-  if(clk > 0){ beginRun(true); return; }
-  if(auto && linked){
+  if(clk > 0){ await beginRun(true); return; }
+  if(auto && linked && !cur.free){
     await scale.tare();
     armBase = 0; armed = true; tone("arm");
     $("run").textContent = "Waiting…"; $("run").className = "go on";
     paint(); return;
   }
-  beginRun();
+  await beginRun();
+};
+$("big").onclick = function(){
+  if(cur.free) return;                       // freestyle always counts up
+  countUp = !countUp; savePrefs(); prev = {}; paint();
 };
 $("tare").onclick = function(){ if(linked){ scale.tare(); tone("arm"); } };
 $("reset").onclick = function(){
+  segs = []; inPour = false; seg = null; quiet = 0;
   running = false; armed = false; clearInterval(ticker); clk = 0; weight = 0; hits = {}; cued = {}; lastKind = "";
   if(linked) scale.reset();
   $("run").className = "go"; $("run").textContent = runLabel(); drawMode();
@@ -1299,6 +1412,7 @@ document.addEventListener("click", function(e){
 
 /* ---------- render ---------- */
 function runLabel(){
+  if(cur.free) return running ? "Finish" : (clk > 0 ? "Resume" : "Start recording");
   if(running) return "Pause";
   if(armed) return "Waiting…";
   if(clk > 0) return "Resume";                 // paused mid-brew
@@ -1313,22 +1427,34 @@ function drawMode(){
 }
 function renderStatic(){
   $("rName").textContent = cur.name; $("rBy").textContent = cur.by;
+  setText("dVal", dose()+" g");
+  if(cur.free){
+    $("steps").innerHTML = "";
+    stepEls = []; pipEls = []; prev = {};
+    $("foot").innerHTML = cur.foot+'<p>Dose '+dose()+' g \u00b7 pour as you like \u00b7 tap Finish when done.</p>';
+  } else {
+    $("steps").innerHTML = cur.steps.map(function(s){
+      return '<li class="step"><span class="t">'+mmss(s[0])+'</span><span class="n">'+(s[2]||"Pour")+
+        '</span><span class="g">'+sc(s[1])+'<em> g</em><span class="hit"></span></span></li>'; }).join("");
+    stepEls = [].slice.call($("steps").children); pipEls = []; prev = {};
+    $("foot").innerHTML = cur.foot+'<p>'+dose()+' g \u00b7 '+sc(cur.water)+' g \u00b7 1:'+(cur.water/cur.dose).toFixed(1)+
+      ' \u00b7 '+cur.temp+' \u00b7 grind '+cur.grind+'</p>';
+  }
   drawMode();
-  $("dVal").textContent = dose()+" g";
-  $("steps").innerHTML = cur.steps.map(function(s){
-    return '<li class="step"><span class="t">'+mmss(s[0])+'</span><span class="n">'+(s[2]||"Pour")+
-      '</span><span class="g">'+sc(s[1])+'<em> g</em><span class="hit"></span></span></li>'; }).join("");
-  stepEls = [].slice.call($("steps").children); pipEls = []; prev = {};
-  $("foot").innerHTML = cur.foot+'<p>'+dose()+' g · '+sc(cur.water)+' g · 1:'+(cur.water/cur.dose).toFixed(1)+
-    ' · '+cur.temp+' · grind '+cur.grind+'</p>';
   paint();
 }
+
 function renderList(){
   var mine = RECIPES.filter(function(r){ return r.custom; });
   var stock = RECIPES.filter(function(r){ return !r.custom; });
   $("pList").innerHTML =
-    '<button class="newBtn" id="newR"><i>+</i>Build a recipe</button>' +
-    '<div class="newHint">Set a dose and ratio and it writes the pours for you — or copy one below and change it.</div>' +
+    '<div class="startGrid">' +
+      '<button class="startCard accent" id="newR">' +
+        '<span class="scTop"><b>Build a recipe</b></span>' +
+        '<span class="scTxt">Set a dose and ratio and it writes the pours for you.</span>' +
+        '<span class="scCta hot">Build one \u2192</span>' +
+      '</button>' +
+    '</div>' +
     (mine.length ? '<div class="sec">Yours</div><div class="cardGrid">'+cards(mine)+'</div>' : '') +
     '<div class="sec">Starting points</div><div class="cardGrid">'+cards(stock)+'</div>';
   $("newR").onclick = function(){ openEditor(null); };
@@ -1359,6 +1485,21 @@ function cards(list){
 });
 $("saveBtn").onclick = function(){
   if(!taste){ $("verdict").textContent = "Pick how it tasted first."; $("verdict").className = "verdict"; return; }
+  if(cur.free){
+    var fin = linked ? +weight.toFixed(1) : null;
+    log.unshift({
+      d:Date.now(), r:"Freestyle", rid:"freestyle", by:"No recipe", free:true,
+      dose:dose(), water:(fin || 0), temp:cur.temp, grind:cur.grind,
+      t:taste, total:mmss(clk), end:fin, linked:linked,
+      segs: segs.map(function(s){
+        return { t0:s.t0, t1:s.t1, add:s.add, w1:s.w1,
+                 rate:+(s.add / Math.max(1, s.t1 - s.t0)).toFixed(1), peak:+s.peak.toFixed(1) };
+      }),
+      acc:null
+    });
+    saveLog(); $("saveBox").className = "save hide"; renderLog(); tab("log");
+    return;
+  }
   var pours = cur.steps.map(function(s,i){
     return { at:s[0], target:sc(s[1]), miss:(hits[i] != null ? +hits[i].toFixed(1) : null), note:s[2]||"" };
   });
@@ -1391,7 +1532,21 @@ function renderLog(){
         '<div><span>Ratio</span><b>1:'+(e.water/e.dose).toFixed(1)+'</b></div>'+
         '<div><span>Time</span><b>'+e.total+'</b></div></div>';
       var pours = "";
-      if(e.pours && e.pours.length){
+      if(e.free && e.segs && e.segs.length){
+        pours = '<div class="lgHead">Pours recorded</div><ul class="lgPours">'+
+          e.segs.map(function(s,n){
+            return '<li><span class="lp">'+mmss(s.t0)+'\u2013'+mmss(s.t1)+'</span>'+
+                   '<span class="lg2">+'+s.add+' g</span>'+
+                   '<span class="ln">to '+s.w1+' g \u00b7 '+(s.t1-s.t0)+'s</span>'+
+                   '<span class="lgMiss mid">'+s.rate+' g/s</span></li>';
+          }).join("")+'</ul>'+
+          '<div class="lgGaps">'+ e.segs.map(function(s,n){
+            if(n === 0) return "";
+            var g = s.t0 - e.segs[n-1].t1;
+            return "paused "+g+"s before pour "+(n+1);
+          }).filter(Boolean).join(" \u00b7 ") +'</div>';
+      }
+      else if(e.pours && e.pours.length){
         pours = '<div class="lgHead">Every pour</div><ul class="lgPours">'+
           e.pours.map(function(p,n){
             var m = p.miss == null ? '<span class="lgNo">\u2014</span>'
@@ -1408,6 +1563,10 @@ function renderLog(){
       if(e.end != null) bits.push("Ended at "+e.end+" g");
       if(e.target) bits.push("Drawdown target "+mmss(e.target));
       if(e.linked === false) bits.push("No scale \u2014 timed only");
+      if(e.free && e.segs && e.segs.length){
+        var pk = Math.max.apply(null, e.segs.map(function(s){ return s.peak; }));
+        bits.push("Peak flow "+pk+" g/s");
+      }
       body = '<div class="lgBody">'+facts+pours+
         '<div class="lgMeta">'+bits.join(" \u00b7 ")+'</div>'+
         '<button class="lgDel" data-i="'+i+'">Delete this entry</button></div>';
@@ -1415,7 +1574,8 @@ function renderLog(){
     return '<li class="lgItem'+(i===openLog?' open':'')+'">'+
       '<button class="lgHeadBtn" data-i="'+i+'">'+
         '<span class="lgMain"><span class="lt">'+e.r+'</span>'+
-        '<span class="ls">'+when+' \u00b7 '+e.dose+' g / '+e.water+' g \u00b7 '+e.total+'</span></span>'+
+        '<span class="ls">'+when+' \u00b7 '+e.dose+' g / '+e.water+' g'+
+          (e.free && e.segs ? ' \u00b7 '+e.segs.length+' pours' : '')+' \u00b7 '+e.total+'</span></span>'+
         '<span class="lgTag '+e.t+'">'+(TL[e.t]||e.t)+'</span>'+
         '<span class="chev">\u203a</span></button>'+body+'</li>';
   }).join("");
@@ -1436,25 +1596,36 @@ function $logFootText(acc){
 }
 function tab(w){
   $("pEdit").className = "hide";
-  $("pBrew").className = w==="brew" ? "" : "hide";
+  /* Freestyle is the brew screen without targets, so it owns a tab rather
+     than hiding behind a card in the recipe list */
+  if(w === "free" && !cur.free){
+    lastRecipe = cur; cur = FREESTYLE; $("reset").click(); renderStatic(); savePrefs();
+  } else if(w === "brew" && cur.free){
+    cur = lastRecipe || RECIPES.filter(function(r){ return !r.custom; })[0] || RECIPES[0];
+    $("reset").click(); renderStatic(); savePrefs();
+  }
+  var onBrew = (w === "brew" || w === "free");
+  $("pBrew").className = onBrew ? "" : "hide";
   $("pScale").className = w==="scale" ? "" : "hide";
   $("pList").className = w==="list" ? "" : "hide";
   $("pLog").className  = w==="log"  ? "" : "hide";
-  $("actionBar").className = w==="brew" ? "bar" : "bar hide";
+  $("actionBar").className = onBrew ? "bar" : "bar hide";
   $("tBrew").setAttribute("aria-selected", w==="brew");
+  $("tFree").setAttribute("aria-selected", w==="free");
   $("tScale").setAttribute("aria-selected", w==="scale");
   $("tList").setAttribute("aria-selected", w==="list");
   $("tLog").setAttribute("aria-selected", w==="log");
-  document.body.style.paddingBottom = (w==="brew" ? "150px" : "84px");
+  document.body.style.paddingBottom = (onBrew ? "150px" : "84px");
   if(w==="scale"){ prev = {}; stepEls = []; pipEls = []; paintScale(); }
   if(w==="list") renderList();
   if(w==="log") renderLog();
-  if(w==="brew"){ prev = {}; renderStatic(); }
+  if(onBrew){ prev = {}; renderStatic(); }
   window.scrollTo(0,0);
 }
-$("tBrew").onclick=function(){tab("brew");}; $("tScale").onclick=function(){tab("scale");}; $("tList").onclick=function(){tab("list");}; $("tLog").onclick=function(){tab("log");};
+$("tBrew").onclick=function(){tab("brew");}; $("tFree").onclick=function(){tab("free");}; $("tScale").onclick=function(){tab("scale");}; $("tList").onclick=function(){tab("list");}; $("tLog").onclick=function(){tab("log");};
 document.addEventListener("visibilitychange", function(){ if(!document.hidden && running && !linked) loop(); });
 renderStatic(); renderLog();
+if(cur.free) tab("free");
 
 /* ================= recipe builder =================
    four stages, one question each, review at the end.
