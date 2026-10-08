@@ -57,7 +57,6 @@
   @media (max-width:360px){
     .hTime{padding-left:12px}
     .hMain{padding-right:11px}
-    .cue,.target,.sub2{padding-right:92px}
   }
   /* valve */
   .cueRow{display:flex;align-items:center;gap:8px;min-height:18px;margin-bottom:2px}
@@ -134,6 +133,11 @@
   .urge{animation:urge 400ms cubic-bezier(.2,.9,.3,1)}
 
   /* live readouts */
+  .valveBtn{display:block;width:100%;padding:16px;border-radius:14px;margin:-6px 0 18px;
+    background:#1D1D21;border:1px solid rgba(255,106,31,.45);color:var(--hot);
+    font-size:15.5px;font-weight:600;transition:transform 120ms,background 180ms}
+  .valveBtn:active{transform:scale(.985);background:#241A15}
+  @media (hover:hover) and (pointer:fine){ .valveBtn:hover{background:#241A15} }
   .live{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:11px 0 18px}
   .live div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px 16px}
   .live dt{font-size:11px;color:var(--mute);letter-spacing:.08em;text-transform:uppercase}
@@ -494,7 +498,6 @@
     .colA{position:sticky;top:calc(78px + env(safe-area-inset-top))}
 
     .inner{padding:30px 30px 26px}
-    .cue,.target,.sub2{padding-right:170px}
     .cue{font-size:13px;letter-spacing:.16em}
     .target,.clock{font-size:clamp(84px,9vw,104px);letter-spacing:-.05em}
     .hMain{padding-right:26px}
@@ -669,6 +672,8 @@
     <div><dt>Flow</dt><dd id="lF">—</dd></div>
   </dl>
 
+  <button class="valveBtn hide" id="valveBtn">Close valve</button>
+
   </div><!-- /colA -->
 
   <div class="colB">
@@ -782,7 +787,6 @@
       <span class="modeHint" id="modeHint">Clock starts on first water</span>
     </div>
     <div class="barRow2">
-      <button class="gh hide" id="valveBtn">Close valve</button>
       <button class="gh" id="tare">Tare</button>
       <button class="gh" id="reset">Reset</button>
     </div>
@@ -1544,7 +1548,7 @@ function runLabel(){
   return (auto && linked) ? "Arm & pour" : "Start";
 }
 function drawMode(){
-  $("valveBtn").className = cur.free ? "gh" : "gh hide";
+  $("valveBtn").className = cur.free ? "valveBtn" : "valveBtn hide";
   setText("valveBtn", (vEvents.length && vEvents[vEvents.length-1].s === "closed") ? "Open valve" : "Close valve");
   $("autoTog").setAttribute("aria-pressed", String(auto));
   $("manTog").setAttribute("aria-pressed", String(!auto));
