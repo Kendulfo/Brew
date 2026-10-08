@@ -59,6 +59,19 @@
     .hMain{padding-right:11px}
     .cue,.target,.sub2{padding-right:92px}
   }
+  /* valve */
+  .valve{display:inline-block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    font-weight:600;padding:4px 9px;border-radius:100px;margin:7px 0 2px;
+    border:1px solid var(--line);color:var(--mute);transition:all 220ms}
+  .valve.open{border-color:rgba(52,199,89,.45);color:var(--ok);background:rgba(52,199,89,.08)}
+  .valve.closed{border-color:rgba(255,106,31,.5);color:var(--hot);background:rgba(255,106,31,.1)}
+  .valve.act{animation:valvePop 600ms cubic-bezier(.2,.9,.3,1)}
+  @keyframes valvePop{0%{transform:scale(1.16)}60%{transform:scale(.98)}100%{transform:scale(1)}}
+  .step .n .vb{font-style:normal;font-size:9.5px;letter-spacing:.08em;font-weight:700;
+    padding:2px 6px;border-radius:4px;margin-right:6px;vertical-align:1px}
+  .step .n .vb.open{background:rgba(52,199,89,.16);color:var(--ok)}
+  .step .n .vb.close{background:rgba(255,106,31,.18);color:var(--hot)}
+  .step .g .noPour{font-style:normal;font-size:12px;font-weight:500;color:var(--mute)}
   .heroTop{display:grid;grid-template-columns:1.1fr 1fr;gap:0;align-items:start}
   .hMain{min-width:0;padding-right:14px}
   /* divider is a short rule between the two readings, not a full-height border */
@@ -625,6 +638,7 @@
       <div class="heroTop">
         <div class="hMain">
           <div class="cue" id="cue">Ready</div>
+          <div class="valve hide" id="valveChip">Valve open</div>
           <div class="target" id="big" aria-live="polite" role="button" tabindex="0">0<em>g</em></div>
           <div class="bigHint" id="bigHint"></div>
         </div>
@@ -764,6 +778,7 @@
       <span class="modeHint" id="modeHint">Clock starts on first water</span>
     </div>
     <div class="barRow2">
+      <button class="gh hide" id="valveBtn">Close valve</button>
       <button class="gh" id="tare">Tare</button>
       <button class="gh" id="reset">Reset</button>
     </div>
@@ -956,6 +971,22 @@ var RECIPES = [
     desc:"The 2021 World Brewers Cup winner. Five identical 60 g pours, each started as the bed runs dry. Easiest recipe to remember and to repeat.",
     steps:[[0,60,"Bloom — pour from height to agitate",10],[40,120,"",10],[80,180,"",10],[120,240,"",10],[150,300,"Last 60 g, then leave it",10]],
     foot:"<p>1:15. Every pour is the same 60 g, which is why this one is so easy to keep consistent.</p><p>Winton used two kettles — hotter for the bloom, cooler later. One kettle off its base between pours does much the same.</p><p>Pour when the bed runs dry rather than strictly on the clock; the times here are a guide.</p>" },
+  { id:"fukahori", name:"Switch \u2014 closed bloom", by:"Emi Fukahori", dose:14, water:200,
+    temp:"93 \u00b0C", grind:"medium \u00b7 25 clicks Comandante", drawdown:140,
+    brewer:"Hario Switch", vStart:"closed",
+    desc:"Start shut so the bloom steeps, open at 0:30, then one continuous pour. The simplest way into the Switch.",
+    steps:[[0,50,"Valve shut \u2014 pour 50 g and let it steep",10,"close"],
+           [30,200,"Open \u00b7 one continuous pour, finish by 1:10",40,"open"]],
+    foot:"<p>1:14.3. The bloom sits in water for the full 30 seconds instead of draining \u2014 that immersion is what the closed start buys you.</p><p>The second pour runs 0:30 to 1:10 \u2014 150 g over 40 seconds, about 3.8 g/s. The app paces you against that and says if you are racing.</p><p>Drawdown finishes around 2:20.</p>" },
+  { id:"devil", name:"The Devil (Switch)", by:"Tetsu Kasuya", dose:20, water:280,
+    temp:"90 \u00b0C, then 70 \u00b0C", grind:"a touch finer than V60", drawdown:180,
+    brewer:"Hario Switch", vStart:"open",
+    desc:"Two hot pours draining through the open valve, then a cool immersion with it shut. The famous Switch recipe.",
+    steps:[[0,60,"Wet the bed evenly \u00b7 90 \u00b0C",10,"open"],
+           [30,120,"Second pour, still draining",10,null],
+           [75,280,"Switch to 70 \u00b0C water \u00b7 pour to 280 g",20,"close"],
+           [105,280,"Steeping done \u2014 let it drain",0,"open"]],
+    foot:"<p>1:14. Cool the kettle to about 70 \u00b0C before the third pour \u2014 topping it up with cold water is the usual trick, and that temperature drop is the point of the recipe.</p><p>Steeps 30 seconds with the valve shut, then opens. Aim for drawdown near 3:00.</p>" },
   { id:"onyx", name:"V60 — four pours", by:"Onyx Coffee Lab", dose:22, water:352, temp:"96 °C", grind:"medium", drawdown:210,
     desc:"Even four-pour cadence, easy to repeat.",
     steps:[[0,60,"Bloom"],[45,150,""],[75,250,""],[105,352,"Let it draw down"]],
@@ -971,6 +1002,14 @@ var lastRecipe = null;
 var kit = { beans:"", grinder:"", grind:"" };      // remembered between brews
 var countUp = false;                    // cafe 1: brewers used to watching weight rise
 var segs = [], inPour = false, seg = null, quiet = 0;
+var vEvents = [];                                  // freestyle valve toggles
+function hasValve(){ return cur.free || !!cur.vStart; }
+function valveAt(i){
+  if(cur.free) return vEvents.length ? vEvents[vEvents.length-1].s : "open";
+  var st = cur.vStart || "open";
+  for(var k=0;k<=i && k<cur.steps.length;k++){ if(cur.steps[k][4]) st = cur.steps[k][4]; }
+  return (st === "close" || st === "closed") ? "closed" : "open";   // actions say close, states say closed
+}
 var auto = true, armed = false, armBase = 0;
 
 var $ = function(id){ return document.getElementById(id); };
@@ -1022,7 +1061,8 @@ function note(f, start, ms, vol){
 /* four voices, deliberately unalike so you can tell them apart without looking */
 function tone(kind){
   unlock();
-  if(kind === "tick"){ note(1500,0,38,.34); }                                   // approach pip
+  if(kind === "valve"){ note(330,0,150,.55); note(247,.16,150,.55); note(330,.32,240,.55); }
+  else if(kind === "tick"){ note(1500,0,38,.34); }                                   // approach pip
   else if(kind === "ready"){ note(700,0,90,.32); }                                  // 3s out: single tap
   else if(kind === "pour"){ note(660,0,130,.6); note(990,.13,190,.6); }        // GO: rising pair
   else if(kind === "soon"){ note(1180,0,70,.5); note(1180,.1,70,.5); note(1180,.2,70,.5); } // ease off: triple
@@ -1305,6 +1345,16 @@ function paint(){
   setCls(st, "stageCls", cls);
   setText("cue", cue); setHTML("big", bigHTML); setText("sub", sub); setText("of", of);
 
+  /* valve state — otherwise it is one more thing to hold in your head */
+  if(hasValve()){
+    var vs = valveAt(f.i);
+    var act = (!cur.free && f.i >= 0 && f.kind !== "pre" && cur.steps[f.i] && cur.steps[f.i][4]);
+    setCls(el("valveChip"), "vChipCls", "valve " + vs + (act ? " act" : ""));
+    setText("valveChip", vs === "open" ? "Valve open" : "Valve closed");
+  } else {
+    setCls(el("valveChip"), "vChipCls", "valve hide");
+  }
+
   if(stepEls.length){
     for(var i=0;i<stepEls.length;i++){
       var c = "step"+(i === f.i && running ? " now" : "")+(i < f.i ? " done" : "");
@@ -1333,7 +1383,8 @@ function cues(f){
         hits[i-1] = weight - sc(cur.steps[i-1][1]);
         cued["hit"+(i-1)] = 1;
       }
-      if(i > 0 || clk > 0) tone("pour");
+      if(cur.steps[i][4]) tone("valve");
+      else if(i > 0 || clk > 0) tone("pour");
     }
   }
 
@@ -1449,9 +1500,15 @@ $("big").onclick = function(){
   if(cur.free) return;                       // freestyle always counts up
   countUp = !countUp; savePrefs(); prev = {}; paint();
 };
+$("valveBtn").onclick = function(){
+  if(!cur.free) return;
+  var next = (vEvents.length && vEvents[vEvents.length-1].s === "closed") ? "open" : "closed";
+  vEvents.push({ t:clk, s:next });
+  tone("valve"); drawMode(); paint();
+};
 $("tare").onclick = function(){ if(linked){ scale.tare(); tone("arm"); } };
 $("reset").onclick = function(){
-  segs = []; inPour = false; seg = null; quiet = 0;
+  segs = []; inPour = false; seg = null; quiet = 0; vEvents = [];
   running = false; armed = false; clearInterval(ticker); clk = 0; weight = 0; hits = {}; cued = {}; lastKind = "";
   if(linked) scale.reset();
   $("run").className = "go"; $("run").textContent = runLabel(); drawMode();
@@ -1483,6 +1540,8 @@ function runLabel(){
   return (auto && linked) ? "Arm & pour" : "Start";
 }
 function drawMode(){
+  $("valveBtn").className = cur.free ? "gh" : "gh hide";
+  setText("valveBtn", (vEvents.length && vEvents[vEvents.length-1].s === "closed") ? "Open valve" : "Close valve");
   $("autoTog").setAttribute("aria-pressed", String(auto));
   $("manTog").setAttribute("aria-pressed", String(!auto));
   setText("modeHint", !linked ? "Connect the Dot to use auto-start"
@@ -1497,9 +1556,11 @@ function renderStatic(){
     stepEls = []; pipEls = []; prev = {};
     $("foot").innerHTML = cur.foot+'<p>Dose '+dose()+' g \u00b7 pour as you like \u00b7 tap Finish when done.</p>';
   } else {
-    $("steps").innerHTML = cur.steps.map(function(s){
-      return '<li class="step"><span class="t">'+mmss(s[0])+'</span><span class="n">'+(s[2]||"Pour")+
-        '</span><span class="g">'+sc(s[1])+'<em> g</em><span class="hit"></span></span></li>'; }).join("");
+    $("steps").innerHTML = cur.steps.map(function(s,i){
+      var vb = s[4] ? '<em class="vb '+s[4]+'">'+(s[4]==="open"?"OPEN":"CLOSE")+'</em> ' : '';
+      var amt = (i > 0 && s[1] === cur.steps[i-1][1]) ? '<em class="noPour">no pour</em>' : sc(s[1])+'<em> g</em>';
+      return '<li class="step"><span class="t">'+mmss(s[0])+'</span><span class="n">'+vb+(s[2]||"Pour")+
+        '</span><span class="g">'+amt+'<span class="hit"></span></span></li>'; }).join("");
     stepEls = [].slice.call($("steps").children); pipEls = []; prev = {};
     $("foot").innerHTML = cur.foot+'<p>'+dose()+' g \u00b7 '+sc(cur.water)+' g \u00b7 1:'+(cur.water/cur.dose).toFixed(1)+
       ' \u00b7 '+cur.temp+' \u00b7 grind '+cur.grind+'</p>';
@@ -1581,7 +1642,12 @@ $("saveAsRecipe").onclick = function(){
   /* what you actually poured becomes the recipe: start times from the clock,
      cumulative weight from the scale, duration from how long each pour ran */
   var steps = segs.map(function(s,i){
-    return [s.t0, Math.round(s.w1), i === 0 ? "Bloom" : "", Math.max(1, s.t1 - s.t0)];
+    /* a valve toggle between the previous pour and this one belongs to this step */
+    var v = null, from = i ? segs[i-1].t1 : -1;
+    for(var k=0;k<vEvents.length;k++){
+      if(vEvents[k].t > from && vEvents[k].t <= s.t0) v = (vEvents[k].s === "closed") ? "close" : "open";
+    }
+    return [s.t0, Math.round(s.w1), i === 0 ? "Bloom" : "", Math.max(1, s.t1 - s.t0), v];
   });
   var last = segs[segs.length-1];
   var d = new Date();
@@ -1600,6 +1666,7 @@ function writeLog(x){
       dose:dose(), water:(fin || 0), temp:cur.temp, grind:cur.grind,
       t:(taste||"unrated"), total:mmss(clk), end:fin, linked:linked,
       beans:x.beans, grinder:x.grinder, grind:x.grind, notes:x.notes,
+      valve: vEvents.slice(),
       segs: segs.map(function(s){
         return { t0:s.t0, t1:s.t1, add:s.add, w1:s.w1,
                  rate:+(s.add / Math.max(1, s.t1 - s.t0)).toFixed(1), peak:+s.peak.toFixed(1) };
@@ -1686,6 +1753,9 @@ function renderLog(){
       if(e.end != null) bits.push("Ended at "+e.end+" g");
       if(e.target) bits.push("Drawdown target "+mmss(e.target));
       if(e.linked === false) bits.push("No scale \u2014 timed only");
+      if(e.valve && e.valve.length){
+        bits.push("Valve " + e.valve.map(function(v){ return v.s+" @ "+mmss(v.t); }).join(", "));
+      }
       if(e.free && e.segs && e.segs.length){
         var pk = Math.max.apply(null, e.segs.map(function(s){ return s.peak; }));
         bits.push("Peak flow "+pk+" g/s");
@@ -1769,15 +1839,16 @@ function blankDraft(from){
   if(from){
     var inc = [], prev = 0;
     from.steps.forEach(function(s){
-      inc.push({at:s[0], add:s[1]-prev, dur:s[3]||Math.max(5,Math.round((s[1]-prev)/8)), note:s[2]||""});
+      inc.push({at:s[0], add:s[1]-prev, dur:s[3]||Math.max(5,Math.round((s[1]-prev)/8)), note:s[2]||"", valve:s[4]||null});
       prev = s[1];
     });
     var gap = inc.length > 2 ? (inc[2].at - inc[1].at) : 45;
     return { name:(from.custom ? from.name : from.name+" (mine)"), dose:from.dose,
              ratio:+(from.water/from.dose).toFixed(1), bloom2:(inc[0].add <= from.dose*2.4),
-             cad:gap, steps:inc, touched:true, draw:(from.drawdown||null), drawSet:!!from.drawdown };
+             cad:gap, steps:inc, touched:true, draw:(from.drawdown||null), drawSet:!!from.drawdown,
+             vStart:(from.vStart||null) };
   }
-  return { name:"", dose:15, ratio:15, bloom2:true, cad:45, pours:3, steps:null, touched:false, draw:null, drawSet:false };
+  return { name:"", dose:15, ratio:15, bloom2:true, cad:45, pours:3, steps:null, touched:false, draw:null, drawSet:false, vStart:null };
 }
 function total(){ return Math.round(ED.dose * ED.ratio); }
 /* drawdown follows the last pour unless the user pins it */
@@ -1843,7 +1914,8 @@ function drawSteps(){
     return lead + '<li class="eRow'+(i===openStep?' open':'')+'" data-i="'+i+'">'+
       '<button class="eRowHead" data-row="'+i+'">'+
         '<span class="when"><b>'+mmss(s.at)+'</b><i>'+s.dur+'s</i></span>'+
-        '<span class="mid"><span class="nt">+'+s.add+' g <em>→ '+run+' g</em></span>'+
+        '<span class="mid"><span class="nt">'+(s.valve ? '<em class="vb '+s.valve+'">'+
+          (s.valve==="open"?"OPEN":"CLOSE")+'</em> ' : '')+'+'+s.add+' g <em>→ '+run+' g</em></span>'+
         '<span class="sub">'+(s.note || (i===0 ? "bloom" : "pour "+(i+1)))+'</span></span>'+
         '<span class="chev">›</span></button>'+
       '<div class="eRowBody">'+
@@ -1860,6 +1932,12 @@ function drawSteps(){
           ' g \u2014 about '+(s.add/Math.max(1,s.dur)).toFixed(1)+' g/s. The app checks your real flow against this.</span></div>'+
         '<div class="grp"><button data-act="d-" data-i="'+i+'">−</button><span class="ro">'+s.dur+
           's</span><button data-act="d+" data-i="'+i+'">+</button></div></div>'+
+        '<div class="ctl"><div class="lab"><b>Valve</b><span>what the switch does at this pour</span></div>'+
+        '<div class="grp vSeg">'+
+          '<button data-act="v0" data-i="'+i+'" aria-pressed="'+(!s.valve)+'">None</button>'+
+          '<button data-act="vo" data-i="'+i+'" aria-pressed="'+(s.valve==="open")+'">Open</button>'+
+          '<button data-act="vc" data-i="'+i+'" aria-pressed="'+(s.valve==="close")+'">Close</button>'+
+        '</div></div>'+
         '<input class="noteIn" data-i="'+i+'" maxlength="60" placeholder="Swirl, pour centre-out…" value="'+
           (s.note||"").replace(/"/g,"&quot;")+'">'+
         (ED.steps.length > 1 ? '<button class="rmBtn" data-act="rm" data-i="'+i+'">Remove this pour</button>' : '')+
@@ -1996,7 +2074,7 @@ $("wNext").onclick = function(){
 $("eCancel").onclick = function(){ ED = null; tab("list"); };
 
 function saveRecipe(){
-  var run = 0, steps = ED.steps.map(function(s){ run += s.add; return [s.at, Math.round(run), s.note, s.dur]; });
+  var run = 0, steps = ED.steps.map(function(s){ run += s.add; return [s.at, Math.round(run), s.note, s.dur, s.valve||null]; });
   var last = ED.steps[ED.steps.length-1];
   var rec = {
     id: editingId || ("my-"+Date.now().toString(36)), custom:true,
@@ -2004,7 +2082,9 @@ function saveRecipe(){
     dose: ED.dose, water: Math.round(run), temp:"94 °C", grind:"your setting",
     drawdown: drawTarget(),
     desc: ED.steps.length+" pours, "+Math.round(run)+" g at 1:"+(run/ED.dose).toFixed(1)+".",
-    steps: steps, foot:"<p>Your recipe. Edit it any time from the Recipes tab.</p>"
+    steps: steps,
+    vStart: (ED.vStart || (ED.steps.some(function(s){ return s.valve; }) ? "open" : null)),
+    foot:"<p>Your recipe. Edit it any time from the Recipes tab.</p>"
   };
   var at = -1;
   for(var i=0;i<RECIPES.length;i++) if(RECIPES[i].id === rec.id) at = i;
@@ -2063,6 +2143,9 @@ document.addEventListener("click", function(ev){
   if(a === "g+")  s.add = s.add + 5;
   if(a === "d-")  s.dur = Math.max(1, s.dur - 1);
   if(a === "d+")  s.dur = s.dur + 1;
+  if(a === "v0") s.valve = null;
+  if(a === "vo") s.valve = "open";
+  if(a === "vc") s.valve = "close";
   if(a === "rm" && ED.steps.length > 1){ ED.steps.splice(j,1); openStep = Math.max(0,j-1); }
   ED.touched = true; drawSteps();
 });
