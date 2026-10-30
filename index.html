@@ -650,7 +650,10 @@
   body.focus #valveBtn,body.focus .colB{
     opacity:0;pointer-events:none;max-height:0;overflow:hidden;
     margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0;border-width:0}
-  body.focus{padding-top:0}
+  /* with the chrome collapsed the card would sit against the top edge, so centre
+     what is left in the viewport. svh, not vh, or Safari's toolbar shifts it. */
+  body.focus{display:flex;flex-direction:column;justify-content:center;
+    min-height:100svh;padding-top:0;padding-bottom:env(safe-area-inset-bottom,0px)}
 
   /* the card itself */
   .stage.focus{border-color:rgba(255,106,31,.55)}
@@ -1435,7 +1438,7 @@ function paint(){
   } else if(f.kind === "hold"){
     var left = f.nxt[0] - clk, over = linked ? f.over : 0;
     cls = over > 2 ? "stage stop" : "stage";
-    cue = over > 2 ? "Over by "+over.toFixed(1)+" g" : "Hold";
+    cue = over > 2 ? "Over by "+over.toFixed(focusOn ? 0 : 1)+" g" : "Hold";
     bigHTML = Math.max(0,left)+'<em>s</em>';
     sub = "Next: "+sc(f.nxt[1])+" g"+(f.nxt[2] ? " — "+f.nxt[2].toLowerCase() : "");
     of = "next pour at "+mmss(f.nxt[0]);
