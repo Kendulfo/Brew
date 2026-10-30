@@ -87,19 +87,23 @@
   .conn.on .connAct{background:none;color:var(--mute);font-weight:500;box-shadow:inset 0 0 0 1px var(--line2)}
 
   /* ============ hero: the recipe, centred and wide ============ */
-  .top{max-height:300px;text-align:center;padding:clamp(30px,7vw,84px) 0 clamp(22px,4vw,46px)}
-  .top h1{max-width:72rem;margin:0 auto;font-size:clamp(2.3rem,5.6vw,5.1rem);font-weight:600;
+  .top{max-height:300px;text-align:center;padding:clamp(30px,7vw,84px) 0 clamp(22px,4vw,46px);
+    display:flex;align-items:baseline;justify-content:center;gap:.9em}
+  .top h1{min-width:0;margin:0;font-size:clamp(1.8rem,5.6vw,5.1rem);font-weight:600;
     letter-spacing:-.048em;line-height:.98;text-wrap:balance}
   .ipill{display:inline-block;width:1.62em;height:.78em;border-radius:999px;vertical-align:.02em;
     margin:0 .1em 0 .22em;background:#2a221b center/cover no-repeat;
     filter:grayscale(.35) sepia(.45) contrast(1.15) brightness(.82);
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
-  .top .r{display:block;margin-top:16px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;
+  .top .r{flex:none;font-family:var(--mono);font-size:12px;letter-spacing:.16em;
     text-transform:uppercase;color:var(--mute)}
+  .top .r:empty{display:none}
 
   /* ============ the stage ============ */
   .stage{position:relative;isolation:isolate;overflow:hidden;border-radius:32px;background:var(--card);
-    border:1px solid var(--line);transition:border-color 160ms;contain:layout paint}
+    border:1px solid var(--line);transition:border-color 160ms;contain:layout paint;
+    /* WebKit drops the rounded overflow clip for the animated/blended photo layer */
+    clip-path:inset(0 round 32px);-webkit-clip-path:inset(0 round 32px)}
   .stageImg{position:absolute;inset:-6%;z-index:-3;background:#1a140f center/cover no-repeat;
     filter:grayscale(1) contrast(1.25) brightness(.6);opacity:.34;mix-blend-mode:luminosity;
     animation:kenburns 48s ease-in-out infinite alternate}
@@ -140,7 +144,7 @@
   .target,.clock{font-size:clamp(44px,16.8vw,92px);font-weight:600;line-height:.9;letter-spacing:-.055em;
     font-feature-settings:"tnum"}
   .target{cursor:pointer;transition:color 120ms,font-size 340ms var(--ease),text-shadow 300ms}
-  .target em{font-size:.3em;font-weight:400;font-style:normal;color:var(--mute);margin-left:.12em;letter-spacing:0}
+  .target em{font-size:.3em;font-weight:400;font-style:normal;color:var(--mute);margin-left:.38em;letter-spacing:0}
   .stage.pour .target{color:var(--hot)}
   .stage.stop .target{color:var(--over)}
   .clock{color:var(--ink);font-weight:300;transition:font-size 340ms var(--ease)}
@@ -184,7 +188,7 @@
   .fgFoot{margin-top:7px;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
 
   /* ============ live readouts ============ */
-  .live{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 0;max-height:160px}
+  .live{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 0 0;max-height:160px}
   .live div{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px 18px}
   .live dt{font-family:var(--mono);font-size:10.5px;color:var(--mute);letter-spacing:.13em;text-transform:uppercase}
   .live dd{font-size:34px;font-weight:500;margin-top:8px;letter-spacing:-.04em;line-height:1}
@@ -603,7 +607,7 @@
     .of{font-size:13px}
     .stage.focus .clock{font-size:104px}
     .stage.focus .target{font-size:clamp(170px,17vw,230px)}
-    .live{grid-template-columns:1fr 1fr}
+    .live{grid-template-columns:1fr}
 
     .bar{bottom:20px;width:min(880px,calc(100% - 64px));max-width:none;display:flex;align-items:center;gap:8px;padding:8px;border-radius:26px}
     .barHandle{display:none}
@@ -709,7 +713,7 @@
 
   <dl class="live" id="liveRow">
     <div><dt>On scale</dt><dd id="lW">—</dd></div>
-    <div><dt>Flow</dt><dd id="lF">—</dd></div>
+    <div hidden><dt>Flow</dt><dd id="lF">—</dd></div>
   </dl>
 
   <button class="valveBtn hide" id="valveBtn">Close valve</button>
