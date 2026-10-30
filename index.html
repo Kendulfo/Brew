@@ -690,6 +690,19 @@
     animation:pipPulse 1.25s ease-in-out infinite}
   @keyframes pipPulse{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.74)}}
 
+  /* flow graph — only on screen while focused */
+  .fg{display:none;margin-top:11px;background:var(--card);border:1px solid var(--line);
+    border-radius:16px;padding:14px 16px 10px}
+  body.focus .fg{display:block}
+  .fgTop{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:9px}
+  .fgTop b{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--mute)}
+  .fgNow{font-size:17px;font-weight:600;letter-spacing:-.01em;transition:color 200ms;color:var(--ink)}
+  .fgNow.good{color:#FFD9C2}
+  .fgNow.fast{color:var(--over)}
+  .fgNow.slow{color:#7FA6C9}
+  .fgNow s{text-decoration:none;font-size:13px;font-weight:400;color:#55555C;margin-left:3px}
+  #fgCv{display:block;width:100%;height:74px;max-width:100%}
+  .fgFoot{margin-top:7px;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:#55555C}
   @media (prefers-reduced-motion:reduce){
     .track i:after,.stage.focus .gauge i.on{animation:none !important}
   }
@@ -745,6 +758,12 @@
         <div class="gauge" id="gauge"></div>
       </div>
     </div>
+  </div>
+
+  <div class="fg" id="fgCard">
+    <div class="fgTop"><b>Flow</b><span class="fgNow" id="fgNow">0.0<s> g/s</s></span></div>
+    <canvas id="fgCv"></canvas>
+    <div class="fgFoot"><span id="fgAim">no target rate</span></div>
   </div>
 
   <dl class="live" id="liveRow">
@@ -1107,6 +1126,8 @@ function valveAt(i){
 }
 var auto = true, armed = false, armBase = 0;
 var focusOn = false, focusQuiet = 0, focusAt = 0;   // pour-triggered focus mode
+var fgPts = [], fgAim = 0, fgCtx = null, fgW = 0, fgH = 0, fgDpr = 1;   // flow graph
+var FGWIN = 120;                                    // 12 s at 10 Hz
 
 var $ = function(id){ return document.getElementById(id); };
 /* cache: paint used to re-query and rewrite the DOM 10x a second */
@@ -1246,6 +1267,7 @@ function onData(d){
      2 g over the tare point is past any bump or breeze, and well under a bloom. */
   if(armed && !running && (d.weight - armBase) >= 2){ armed = false; beginRun(); }
   if(running && d.timer > 0) clk = d.timer;
+  fgPush(d.flow);
   setText("lW", d.weight.toFixed(1)+" g");
   paintScale();
   setHTML("lF", '<span class="'+(d.flow>9?"warn":"")+'">'+d.flow.toFixed(1)+" g/s</span>");
@@ -1426,9 +1448,10 @@ function paint(){
       if(f.step[3]){
         var prevG = f.i > 0 ? sc(cur.steps[f.i-1][1]) : 0;
         var aim = (f.target - prevG) / f.step[3];
+        fgAim = aim;
         if(flow > 0.3) sub = "aim " + aim.toFixed(1) + " g/s · now " + flow.toFixed(1) +
           (flow > aim*1.4 ? " — too fast" : flow < aim*0.6 ? " — too slow" : "");
-      }
+      } else { fgAim = 0; }
       if(near) anim(big, "urge", "near"+f.i);
     } else {
       cls = "stage pour"; cue = "Pour to";
@@ -1482,9 +1505,77 @@ function paint(){
       } else if(h && h.textContent) h.textContent = "";
     }
   }
+  if(fc){
+    if(!fgCtx || !fgW) fgSize();
+    var fs = fgPts.length ? fgPts[fgPts.length-1].s : "good";
+    setHTML("fgNow", flow.toFixed(1) + "<s> g/s</s>");
+    setCls(el("fgNow"), "fgNowCls", "fgNow " + (flow < 0.3 ? "" : fs));
+    setText("fgAim", fgAim ? ("hold " + (fgAim*0.6).toFixed(1) + " – " + (fgAim*1.4).toFixed(1) + " g/s")
+                           : "no target rate for this step");
+    fgDraw();
+  }
   cues(f);
 }
 
+/* flow graph: the trace over the band the step wants you inside. 0.6x-1.4x of the
+   step's ideal rate are the same thresholds the sub line already used to call a pour
+   fast or slow, so the graph draws them instead of describing them. */
+function fgSize(){
+  var cv = el("fgCv"); if(!cv) return;
+  var r = cv.getBoundingClientRect(); if(!r.width) return;
+  fgDpr = Math.min(2, window.devicePixelRatio || 1);
+  fgW = r.width; fgH = r.height;
+  cv.width = Math.max(1, Math.round(fgW * fgDpr));
+  cv.height = Math.max(1, Math.round(fgH * fgDpr));
+  fgCtx = cv.getContext("2d");
+  fgCtx.setTransform(fgDpr, 0, 0, fgDpr, 0, 0);
+}
+function fgState(v){
+  if(!fgAim) return "good";
+  return v > fgAim * 1.4 ? "fast" : v < fgAim * 0.6 ? "slow" : "good";
+}
+function fgPush(v){
+  fgPts.push({ v:v, s:fgState(v) });
+  if(fgPts.length > FGWIN) fgPts.shift();
+}
+function fgDraw(){
+  if(!fgCtx || !fgW) return;
+  var pad = 5, h = fgH - pad * 2, c = fgCtx;
+  c.clearRect(0, 0, fgW, fgH);
+  var peak = 0, i;
+  for(i = 0; i < fgPts.length; i++) if(fgPts[i].v > peak) peak = fgPts[i].v;
+  var max = Math.max(fgAim ? fgAim * 2 : 0, peak * 1.12, 4);
+  var y = function(v){ return pad + h - (Math.min(v, max) / max) * h; };
+
+  if(fgAim){
+    var hi = y(fgAim * 1.4), lo = y(fgAim * 0.6);
+    c.fillStyle = "rgba(255,106,31,.11)";
+    c.fillRect(0, hi, fgW, lo - hi);
+    c.lineWidth = 1; c.strokeStyle = "rgba(255,170,110,.34)"; c.setLineDash([3,4]);
+    c.beginPath(); c.moveTo(0, hi + .5); c.lineTo(fgW, hi + .5); c.stroke();
+    c.beginPath(); c.moveTo(0, lo + .5); c.lineTo(fgW, lo + .5); c.stroke();
+    c.strokeStyle = "rgba(255,217,194,.6)"; c.setLineDash([5,5]);
+    c.beginPath(); c.moveTo(0, y(fgAim) + .5); c.lineTo(fgW, y(fgAim) + .5); c.stroke();
+    c.setLineDash([]);
+  }
+  if(fgPts.length < 2) return;
+  var step = fgW / (FGWIN - 1), x0 = fgW - (fgPts.length - 1) * step;
+  c.lineWidth = 2.4; c.lineJoin = "round"; c.lineCap = "round";
+  for(i = 1; i < fgPts.length; i++){
+    var p = fgPts[i];
+    c.strokeStyle = !fgAim ? "#FF8A4A"
+                  : p.s === "good" ? "#FF8A4A"
+                  : p.s === "fast" ? "#FF3B30" : "#7FA6C9";
+    c.beginPath();
+    c.moveTo(x0 + (i - 1) * step, y(fgPts[i - 1].v));
+    c.lineTo(x0 + i * step, y(p.v));
+    c.stroke();
+  }
+  var lx = x0 + (fgPts.length - 1) * step, ly = y(fgPts[fgPts.length - 1].v);
+  c.fillStyle = "#FFD9C2"; c.shadowColor = "rgba(255,170,110,.9)"; c.shadowBlur = 10;
+  c.beginPath(); c.arc(lx, ly, 3.1, 0, 6.3); c.fill(); c.shadowBlur = 0;
+}
+window.addEventListener("resize", function(){ fgSize(); fgDraw(); });
 var lastTick = 0;
 function cues(f){
   if(!running || cur.free) return;
