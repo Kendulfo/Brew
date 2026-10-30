@@ -618,6 +618,83 @@
   @media (prefers-reduced-motion:reduce){
     *{animation:none !important;transition:none !important}
   }
+
+  /* ===== focus mode: the card takes the screen while water is moving ===== */
+  /* base transitions, added here so the size change animates both ways */
+  .heroTop{transition:grid-template-columns 340ms cubic-bezier(.2,.9,.3,1),gap 300ms,opacity 160ms}
+  .heroTop.swap{opacity:.5}
+  .hMain,.hTime{transition:padding 300ms,border-color 300ms}
+  .hTime:before{transition:background 200ms,opacity 200ms}
+  .target{transition:color 120ms,font-size 340ms cubic-bezier(.2,.9,.3,1),text-shadow 300ms}
+  .clock{transition:font-size 340ms cubic-bezier(.2,.9,.3,1)}
+  .sub2{transition:color 300ms,margin-top 300ms}
+  .heroBot{transition:border-color 200ms,margin-top 340ms,padding-top 340ms}
+  .track{transition:height 340ms cubic-bezier(.2,.9,.3,1),box-shadow 300ms,border-radius 340ms}
+  .track i{position:relative;overflow:hidden}
+  .gauge{transition:height 340ms cubic-bezier(.2,.9,.3,1),gap 340ms}
+  .gauge i{transition:background 200ms,box-shadow 300ms,transform 300ms}
+
+  /* chrome leaves while the water runs. the fixed bars only need to fade; anything
+     in the flow has to give its space back too, or the card floats in a dead gap. */
+  .tabs,.bar{transition:opacity 220ms ease}
+  body.focus .tabs,body.focus .bar{opacity:0;pointer-events:none}
+
+  .top{max-height:60px}
+  .hdr{max-height:140px}
+  #liveRow{max-height:140px}
+  #valveBtn{max-height:90px}
+  .top,.hdr,#liveRow,#valveBtn,.colB{
+    transition:opacity 200ms ease,max-height 320ms cubic-bezier(.2,.9,.3,1),
+      margin 320ms cubic-bezier(.2,.9,.3,1),padding 320ms cubic-bezier(.2,.9,.3,1)}
+  body.focus .top,body.focus .hdr,body.focus #liveRow,
+  body.focus #valveBtn,body.focus .colB{
+    opacity:0;pointer-events:none;max-height:0;overflow:hidden;
+    margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0;border-width:0}
+  body.focus{padding-top:0}
+
+  /* the card itself */
+  .stage.focus{border-color:rgba(255,106,31,.55)}
+  .stage.focus .inner{padding:26px 20px 24px}
+  .stage.focus .heroTop{grid-template-columns:1fr;gap:18px;text-align:center}
+  .stage.focus .hMain{order:2;padding-right:0}
+  .stage.focus .hTime{order:1;padding-left:0;padding-bottom:16px;border-bottom:1px solid #4A3A2E}
+  .stage.focus .hTime:before{opacity:0}
+  .stage.focus .cueRow{justify-content:center}
+  .stage.focus .clock{font-size:clamp(68px,21vw,94px);letter-spacing:-.035em}
+  .stage.focus .target{font-size:clamp(92px,34vw,162px);text-shadow:0 0 42px rgba(255,106,31,.42)}
+  .stage.focus .target em{font-size:32px;margin-left:7px}
+  .stage.focus.stop .target{text-shadow:0 0 56px rgba(255,138,74,.7)}
+  .stage.focus .sub2{text-align:center;margin-top:18px}
+  .stage.focus .of,.stage.focus .bigHint{display:none}
+  .stage.focus .heroBot{margin-top:26px;padding-top:21px}
+
+  /* the bars grow and come alive */
+  .stage.focus .track{height:22px;border-radius:12px;
+    box-shadow:inset 0 0 0 1px rgba(255,138,74,.2),0 0 26px rgba(255,106,31,.14)}
+  .stage.focus .track i{background:linear-gradient(90deg,#C64E12,var(--hot))}
+  .stage.focus.stop .track i{background:linear-gradient(90deg,#C62A20,var(--over))}
+  .track i:after{content:"";position:absolute;inset:0;opacity:0;
+    background:linear-gradient(100deg,transparent 18%,rgba(255,255,255,.34) 50%,transparent 82%);
+    transform:translateX(-100%)}
+  .stage.focus .track i:after{opacity:1;animation:sheen 1.25s linear infinite}
+  .stage.focus.stop .track i:after{animation-duration:.62s}
+  @keyframes sheen{to{transform:translateX(100%)}}
+  .track i:before{content:"";position:absolute;right:0;top:0;bottom:0;width:0;
+    background:#FFD9C2;transition:width 300ms,box-shadow 300ms}
+  .stage.focus .track i:before{width:3px;box-shadow:0 0 14px 3px rgba(255,170,110,.85)}
+  .stage.focus .gauge{height:11px;gap:6px}
+  .stage.focus .gauge i.on{background:var(--hot);box-shadow:0 0 18px rgba(255,106,31,.6);
+    animation:pipPulse 1.25s ease-in-out infinite}
+  @keyframes pipPulse{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.74)}}
+
+  @media (prefers-reduced-motion:reduce){
+    .track i:after,.stage.focus .gauge i.on{animation:none !important}
+  }
+  @media (min-width:700px){
+    .stage.focus .inner{padding:32px 28px 28px}
+    .stage.focus .clock{font-size:98px}
+    .stage.focus .target{font-size:178px}
+  }
 </style>
 </head>
 <body>
@@ -1026,6 +1103,7 @@ function valveAt(i){
   return (st === "close" || st === "closed") ? "closed" : "open";   // actions say close, states say closed
 }
 var auto = true, armed = false, armBase = 0;
+var focusOn = false, focusQuiet = 0, focusAt = 0;   // pour-triggered focus mode
 
 var $ = function(id){ return document.getElementById(id); };
 /* cache: paint used to re-query and rewrite the DOM 10x a second */
@@ -1149,6 +1227,18 @@ function onData(d){
       }
     }
   }
+  /* focus mode: water moving -> the card takes the screen, and gives it back when
+     the pour ends. two thresholds plus a minimum dwell, or a wobbling kettle flips
+     the layout back and forth mid-pour. 10 quiet samples is one second at 10 Hz. */
+  if(running && linked){
+    if(!focusOn && d.flow >= 0.8){
+      focusOn = true; focusQuiet = 0; focusAt = Date.now();
+    } else if(focusOn){
+      focusQuiet = (d.flow < 0.4) ? focusQuiet + 1 : 0;
+      if(focusQuiet >= 10 && Date.now() - focusAt > 800){ focusOn = false; focusQuiet = 0; }
+    }
+  } else if(focusOn){ focusOn = false; focusQuiet = 0; }
+
   /* armed: tared, brewer on the scale, waiting for the bloom to land.
      2 g over the tare point is past any bump or breeze, and well under a bloom. */
   if(armed && !running && (d.weight - armBase) >= 2){ armed = false; beginRun(); }
@@ -1323,11 +1413,11 @@ function paint(){
       cls = (near && f.left <= 1.2) ? "stage stop" : "stage pour";
       if(countUp){
         cue = near ? "Ease off" : "Pour to "+f.target;
-        bigHTML = weight.toFixed(weight < 100 ? 1 : 0)+'<em>g</em>';
+        bigHTML = weight.toFixed(focusOn ? 0 : (weight < 100 ? 1 : 0))+'<em>g</em>';
         sub = (f.step[2] || "Steady circles.") + " \u00b7 " + f.left.toFixed(f.left < 10 ? 1 : 0)+" g to go";
       } else {
         cue = near ? "Ease off" : "Pour";
-        bigHTML = f.left.toFixed(f.left < 10 ? 1 : 0)+'<em>g</em>';
+        bigHTML = f.left.toFixed(focusOn ? 0 : (f.left < 10 ? 1 : 0))+'<em>g</em>';
         sub = (f.step[2] || "Steady circles.") + " \u00b7 to " + f.target + " g";
       }
       if(f.step[3]){
@@ -1357,7 +1447,15 @@ function paint(){
                               : "Leave it alone. Target "+mmss(cur.drawdown)+".";
     of = "total "+mmss(cur.drawdown);
   }
+  var fc = focusOn && running;
+  if(fc) cls += " focus";
   setCls(st, "stageCls", cls);
+  if(prev.focusBody !== fc){
+    prev.focusBody = fc;
+    document.body.classList.toggle("focus", fc);
+    var ht = el("stage").querySelector(".heroTop");   /* soften the column-to-stack reflow */
+    if(ht){ ht.classList.add("swap"); setTimeout(function(){ ht.classList.remove("swap"); }, 170); }
+  }
   setText("cue", cue); setHTML("big", bigHTML); setText("sub", sub); setText("of", of);
 
   /* valve state — otherwise it is one more thing to hold in your head */
