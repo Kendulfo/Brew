@@ -193,6 +193,19 @@
   .live dt{font-family:var(--mono);font-size:10.5px;color:var(--mute);letter-spacing:.13em;text-transform:uppercase}
   .live dd{font-size:34px;font-weight:500;margin-top:8px;letter-spacing:-.04em;line-height:1}
   .live dd .warn{color:var(--over)}
+  /* no scale: the weight card becomes the way in */
+  .live div{position:relative}
+  .liveAsk{display:none;width:100%;margin-top:8px;align-items:center;justify-content:space-between;gap:12px;text-align:left}
+  .liveAsk:after{content:"";position:absolute;inset:0;border-radius:22px}
+  #liveRow.ask #lW{display:none}
+  #liveRow.ask .liveAsk{display:flex}
+  .laW{font-size:clamp(34px,4vw,44px);font-weight:500;letter-spacing:-.04em;line-height:1;color:var(--dim)}
+  .laW small{font-size:.5em;margin-left:.2em;letter-spacing:0}
+  .laGo{flex:none;padding:10px 14px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,122,46,.55);
+    color:var(--hot2);font-size:13.5px;font-weight:600;transition:background 200ms,color 200ms}
+  .liveAsk:hover .laGo,.liveAsk:focus-visible .laGo{background:var(--hot);color:var(--onhot)}
+  .liveAsk:focus-visible{outline:none}
+  .liveAsk:focus-visible:after{box-shadow:0 0 0 2px var(--hot)}
   .valveBtn{display:block;width:100%;max-height:90px;padding:17px;border-radius:20px;margin:12px 0 0;
     background:rgba(255,122,46,.08);box-shadow:inset 0 0 0 1px rgba(255,122,46,.45);color:var(--hot);
     font-size:15.5px;font-weight:600}
@@ -531,6 +544,24 @@
   .sheetCard .do{width:100%;margin-top:22px;padding:18px;background:var(--hot);color:var(--onhot);border-radius:20px;font-weight:650;font-size:16px}
   .sheetCard .do2{width:100%;margin-top:9px;padding:16px;border-radius:20px;box-shadow:inset 0 0 0 1px var(--hot);color:var(--hot);font-weight:600;font-size:14.5px}
   .sheetCard .do3{width:100%;margin-top:9px;padding:14px;border-radius:20px;color:var(--mute);font-size:14px}
+  /* connect prompt: centred, with the scale "listening" for a pairing */
+  .nudgeCard{max-width:420px;text-align:center;padding-top:34px}
+  .nudgeCard h4{font-size:26px;letter-spacing:-.04em}
+  .nudgeCard .sheetSub{max-width:32ch;margin:10px auto 26px;font-size:15px;text-wrap:balance}
+  .nudgeCard .do{margin-top:0}
+  .nudgeArt{position:relative;width:76px;height:76px;margin:0 auto 22px;display:grid;place-items:center}
+  .nudgeArt span{position:relative;width:56px;height:56px;border-radius:18px;background:var(--card2);
+    box-shadow:inset 0 0 0 1px var(--line2),0 10px 24px rgba(0,0,0,.4)}
+  .nudgeArt span:after{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;
+    border-radius:50%;background:var(--hot);box-shadow:0 0 12px rgba(255,122,46,.8)}
+  .nudgeArt i{position:absolute;inset:6px;border-radius:24px;box-shadow:inset 0 0 0 1px rgba(255,122,46,.5);
+    animation:ping 2.4s var(--ease) infinite;opacity:0}
+  .nudgeArt i+i{animation-delay:1.2s}
+  @keyframes ping{0%{transform:scale(.8);opacity:.9}100%{transform:scale(1.45);opacity:0}}
+  @media (prefers-reduced-motion:reduce){.nudgeArt i{animation:none;opacity:.35;transform:scale(1.15)}.nudgeArt i+i{display:none}}
+  .nudgeAlt{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .nudgeAlt button{padding:14px 8px;border-radius:18px;font-size:14px;color:var(--mute);box-shadow:inset 0 0 0 1px var(--line)}
+  @media (hover:hover) and (pointer:fine){.nudgeAlt button:hover{background:#2A221C;color:var(--ink)}}
 
   /* ============ press and hover ============ */
   button{transition:transform 120ms ease,background 200ms ease,box-shadow 200ms ease,color 200ms ease,opacity 200ms ease,filter 200ms ease}
@@ -639,6 +670,31 @@
     .top h1{font-size:clamp(2.2rem,4.4vw,3.6rem)}
   }
 
+  /* iPad landscape (and small laptops): timer on the left, the recipe on the right,
+     so the clock, the dose and every pour sit on one screen */
+  @media (min-width:1000px) and (max-width:1439px) and (orientation:landscape){
+    #pBrew{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;align-items:start}
+    body.focus #pBrew{display:block}
+    .top{height:72px;padding:0 0 4px;align-items:center}
+    .top h1{font-size:clamp(2rem,3.2vw,2.6rem)}
+    .colB{margin-top:72px}
+    .dose{padding:10px 10px 10px 18px;gap:10px}
+    .dose .lab{font-size:12.5px}
+    .dose button{width:44px;height:44px;flex:0 0 44px}
+    .dose .val{font-size:26px;min-width:72px}
+    .inner{padding:28px 28px 24px}
+    .target,.clock{font-size:clamp(84px,8vw,112px)}
+    .hMain{padding-right:20px} .hTime{padding-left:20px}
+
+    /* the pours stack as a list again: the column is too narrow for the accordion */
+    .steps{flex-direction:column;height:auto;gap:6px}
+    .step{flex:none;display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:12px;padding:12px 16px 12px 14px;border-radius:18px}
+    .step .n,.steps:hover .step .n{margin:0;opacity:1;transform:none;-webkit-line-clamp:1}
+    .step .g{text-align:right;font-size:22px}
+    .notes{padding:22px 24px 18px}
+    .foot p{font-size:21px}
+  }
+
   @media (prefers-reduced-motion:reduce){
     *,*:before,*:after{animation:none !important;transition:none !important}
   }
@@ -712,7 +768,8 @@
   </div>
 
   <dl class="live" id="liveRow">
-    <div><dt>On scale</dt><dd id="lW">—</dd></div>
+    <div><dt>On scale</dt><dd id="lW">—</dd>
+      <button class="liveAsk" id="liveAsk"><span class="laW">0.0<small>g</small></span><span class="laGo" id="laGo">Connect the Dot</span></button></div>
     <div hidden><dt>Flow</dt><dd id="lF">—</dd></div>
   </dl>
 
@@ -876,6 +933,19 @@
     <button class="do" id="saveBtn">Save brew</button>
     <button class="do2 hide" id="saveAsRecipe">Also save as a recipe</button>
     <button class="do3" id="sheetSkip">Skip and reset</button>
+  </div>
+</div>
+
+<div class="sheetWrap hide" id="nudgeWrap">
+  <div class="sheetCard nudgeCard" role="dialog" aria-modal="true" aria-labelledby="nudgeTitle">
+    <div class="nudgeArt" aria-hidden="true"><i></i><i></i><span></span></div>
+    <h4 id="nudgeTitle">Your Dot isn't connected</h4>
+    <p class="sheetSub">Press the scale's button to wake it, then tap Connect and pick your Dot from the list.</p>
+    <button class="do" id="nudgeGo">Connect the Dot</button>
+    <div class="nudgeAlt">
+      <button id="nudgeSkip">Not now</button>
+      <button id="nudgeNo">Don't show again</button>
+    </div>
   </div>
 </div>
 <script>
@@ -2370,6 +2440,60 @@ document.addEventListener("change", function(ev){
     }
     start();
   };
+})();
+
+/* ---------- nudge: invite people without a scale to connect one ----------
+   It sits in front of the existing handlers (capture phase) and hands off to them,
+   so the brew script itself is unchanged. */
+(function(){
+  var card = $("connCard"), row = $("liveRow"), wrap = $("nudgeWrap");
+  var asked = false;
+  var optedOut = false;
+  try{ optedOut = localStorage.getItem("brew:nudge") === "off"; }catch(e){}
+
+  /* the weight card shows the invite whenever no scale is linked or pairing */
+  function sync(){ row.classList.toggle("ask", !linked && !/busy/.test(card.className)); }
+  new MutationObserver(sync).observe(card, {attributes:true, attributeFilter:["class"]});
+  sync();
+
+  var fromStart = false;
+  function openNudge(start){
+    asked = true; fromStart = start;
+    wrap.className = "sheetWrap";
+    $("nudgeGo").focus({preventScroll:true});
+  }
+  function closeNudge(){ wrap.className = "sheetWrap hide"; $("run").focus({preventScroll:true}); }
+  /* ask as soon as the page opens; the Start check below
+     catches a scale that drops later in the visit */
+  if(!linked && !optedOut) setTimeout(function(){ if(!linked) openNudge(false); }, 700);
+
+  document.addEventListener("click", function(e){
+    var t = e.target.closest ? e.target : null;
+    if(!t) return;
+    if(t.closest("#liveAsk")){ e.stopPropagation(); card.click(); return; }
+    /* ask once per visit, on the first Start without a scale */
+    if(t.closest("#run") && !running && !linked && !asked && !optedOut){
+      e.stopPropagation(); openNudge(true);
+    }
+  }, true);
+
+  $("nudgeGo").onclick = function(){
+    closeNudge();
+    card.click();                           // still inside the tap, so the pairing prompt is allowed
+  };
+  $("nudgeSkip").onclick = function(){
+    closeNudge();
+    if(fromStart) $("run").click();         // asked is set now, so this one goes through
+  };
+  $("nudgeNo").onclick = function(){
+    optedOut = true;
+    try{ localStorage.setItem("brew:nudge", "off"); }catch(e){}
+    $("nudgeSkip").onclick();
+  };
+  wrap.addEventListener("click", function(e){ if(e.target === wrap) closeNudge(); });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && wrap.className === "sheetWrap") closeNudge();
+  });
 })();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
