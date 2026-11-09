@@ -978,7 +978,9 @@ var CMD = {
    No flow and no timer on the wire: flow is derived from weight here, the
    timer is a local stopwatch, tare is a software offset. */
 var CK_WEIGHT = "0000fff3-0000-1000-8000-00805f9b34fb";
+var CK_COMPANY = 0xCF4B;   /* advert bytes 4B CF, little-endian */
 function isCK(name){ return /^CK\d/i.test(name || ""); }
+function isDotName(name){ return /^(dot|tes|timemore)/i.test(name || ""); }
 
 function Scale(onData, onState){
   this.onData = onData; this.onState = onState;
@@ -991,23 +993,40 @@ Scale.prototype.connect = async function(anyAll){
   if(!navigator.bluetooth) throw new Error("no-webbluetooth");
   this.onState("scanning");
   /* anyAll: show every BLE device, for when the Dot's advert carries no
-     service UUID (it does that outside pairing mode). the CK863 never
-     advertises a service, so it is matched by name. */
-  var opts = anyAll
-    ? { acceptAllDevices:true, optionalServices:[SVC,"battery_service"] }
-    : { filters:[{services:[SVC]},{namePrefix:"Dot"},{namePrefix:"DOT"},
-                 {namePrefix:"dot"},{namePrefix:"TES"},{namePrefix:"TIMEMORE"},
-                 {namePrefix:"CK"}],
-        optionalServices:[SVC,"battery_service"] };
-  this.dev = await navigator.bluetooth.requestDevice(opts);
+     service UUID (it does that outside pairing mode).
+     the CK863 advertises neither a service nor a name — only manufacturer
+     data with company ID 0xCF4B — so it is matched on that. */
+  var OPT = [SVC,"battery_service"];
+  var named = [{services:[SVC]},{namePrefix:"Dot"},{namePrefix:"DOT"},
+               {namePrefix:"dot"},{namePrefix:"TES"},{namePrefix:"TIMEMORE"},
+               {namePrefix:"CK"}];
+  if(anyAll){
+    this.dev = await navigator.bluetooth.requestDevice({ acceptAllDevices:true, optionalServices:OPT });
+  } else {
+    try{
+      this.dev = await navigator.bluetooth.requestDevice({
+        filters: named.concat([{manufacturerData:[{companyIdentifier:CK_COMPANY}]}]),
+        optionalServices:OPT });
+    }catch(e){
+      /* older engines reject the manufacturerData key outright */
+      if(!e || e.name !== "TypeError") throw e;
+      this.dev = await navigator.bluetooth.requestDevice({ filters:named, optionalServices:OPT });
+    }
+  }
   this.dev.addEventListener("gattserverdisconnected", function(){ this.onState("lost"); }.bind(this));
   this.onState("connecting");
   var server = await this.dev.gatt.connect();
   var svc = await server.getPrimaryService(SVC);
-  if(isCK(this.dev.name)){
-    this.kind = "ck"; this.label = "INSMART " + this.dev.name;
+  /* the name can be blank when the advert carried none. the Dot names
+     itself; anything else with an FFF3 notify characteristic is the CK. */
+  var ckChar = null;
+  if(!isDotName(this.dev.name)){
+    try{ ckChar = await svc.getCharacteristic(CK_WEIGHT); }catch(e){}
+  }
+  if(isCK(this.dev.name) || ckChar){
+    this.kind = "ck"; this.label = "INSMART " + (this.dev.name || "CK863");
     this.off = 0; this.hist = []; this.swAcc = 0; this.swAt = null;
-    var ck = await svc.getCharacteristic(CK_WEIGHT);
+    var ck = ckChar || await svc.getCharacteristic(CK_WEIGHT);
     ck.addEventListener("characteristicvaluechanged", this._onCK.bind(this));
     await ck.startNotifications();
     /* standard battery service, unlike the Dot's in-protocol query */
