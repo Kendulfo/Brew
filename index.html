@@ -720,7 +720,7 @@
   <span class="connDot" id="cDot"></span>
   <span class="connTxt">
     <b id="cTitle">Connect your scale</b>
-    <i id="cLab">Tap to pair the Timemore Dot</i>
+    <i id="cLab">Tap to pair your scale</i>
   </span>
   <span class="connAct" id="cBtn">Connect</span>
 </button>
@@ -968,25 +968,58 @@ var CMD = {
   battery:    function(){ return frame(0x02,0x05,[]); }
 };
 
+/* INSMART CK863 (lefu / Shenzhen Unique Scales) — reverse-engineered from
+   nRF Connect captures, Nov 2026. Same FFF0 service as the Dot, different
+   wire format, no CRC, no command set mapped yet.
+   FFF3 notify, ~10 Hz, one packet per notification:
+     0x14 0x11 | flags | mode | 05 00 x6 | weight int32 LE (0.1 g) | 00 00 | snapshot u16 LE
+     flags: 0x10 bit = stable. mode: 01 weighing, 02 pour-over.
+     0x13 0x02 0x01 mode  = mode changed on the scale's knob.
+   No flow and no timer on the wire: flow is derived from weight here, the
+   timer is a local stopwatch, tare is a software offset. */
+var CK_WEIGHT = "0000fff3-0000-1000-8000-00805f9b34fb";
+function isCK(name){ return /^CK\d/i.test(name || ""); }
+
 function Scale(onData, onState){
   this.onData = onData; this.onState = onState;
   this.buf = []; this.dev = null; this.tx = null;
+  this.kind = "dot"; this.label = "Timemore Dot";
+  /* CK863 state */
+  this.off = 0; this.raw = 0; this.hist = []; this.swAcc = 0; this.swAt = null;
 }
 Scale.prototype.connect = async function(anyAll){
   if(!navigator.bluetooth) throw new Error("no-webbluetooth");
   this.onState("scanning");
   /* anyAll: show every BLE device, for when the Dot's advert carries no
-     service UUID (it does that outside pairing mode) */
+     service UUID (it does that outside pairing mode). the CK863 never
+     advertises a service, so it is matched by name. */
   var opts = anyAll
-    ? { acceptAllDevices:true, optionalServices:[SVC] }
+    ? { acceptAllDevices:true, optionalServices:[SVC,"battery_service"] }
     : { filters:[{services:[SVC]},{namePrefix:"Dot"},{namePrefix:"DOT"},
-                 {namePrefix:"dot"},{namePrefix:"TES"},{namePrefix:"TIMEMORE"}],
-        optionalServices:[SVC] };
+                 {namePrefix:"dot"},{namePrefix:"TES"},{namePrefix:"TIMEMORE"},
+                 {namePrefix:"CK"}],
+        optionalServices:[SVC,"battery_service"] };
   this.dev = await navigator.bluetooth.requestDevice(opts);
   this.dev.addEventListener("gattserverdisconnected", function(){ this.onState("lost"); }.bind(this));
   this.onState("connecting");
   var server = await this.dev.gatt.connect();
   var svc = await server.getPrimaryService(SVC);
+  if(isCK(this.dev.name)){
+    this.kind = "ck"; this.label = "INSMART " + this.dev.name;
+    this.off = 0; this.hist = []; this.swAcc = 0; this.swAt = null;
+    var ck = await svc.getCharacteristic(CK_WEIGHT);
+    ck.addEventListener("characteristicvaluechanged", this._onCK.bind(this));
+    await ck.startNotifications();
+    /* standard battery service, unlike the Dot's in-protocol query */
+    try{
+      var bs = await server.getPrimaryService("battery_service");
+      var bl = await (await bs.getCharacteristic("battery_level")).readValue();
+      this.onState("battery:" + bl.getUint8(0));
+    }catch(e){}
+    this.onState("ready");
+    return;
+  }
+  this.kind = "dot"; this.label = "Timemore Dot";
   var rx = await svc.getCharacteristic(UPLINK);
   this.tx = await svc.getCharacteristic(DOWNLINK);
   rx.addEventListener("characteristicvaluechanged", this._onNotify.bind(this));
@@ -1002,11 +1035,55 @@ Scale.prototype.send = async function(bytes){
     else await this.tx.writeValue(bytes);
   }catch(e){}
 };
-Scale.prototype.tare   = function(){ return this.send(CMD.tare()); };
-Scale.prototype.start  = async function(){ await this.send(CMD.timerReset()); await this.send(CMD.timerStart()); };
-Scale.prototype.pause  = function(){ return this.send(CMD.timerPause()); };
-Scale.prototype.reset  = function(){ return this.send(CMD.timerReset()); };
+/* CK863 has no mapped commands: tare and the timer live on this side */
+Scale.prototype._sw = function(){ return this.swAcc + (this.swAt ? Date.now() - this.swAt : 0); };
+Scale.prototype.tare = function(){
+  if(this.kind === "ck"){ this.off = this.raw; this.hist = []; return Promise.resolve(); }
+  return this.send(CMD.tare());
+};
+/* resume: continue the clock. a fresh start zeroes it first. */
+Scale.prototype.start = async function(resume){
+  if(this.kind === "ck"){ if(!resume) this.swAcc = 0; if(!this.swAt) this.swAt = Date.now(); return; }
+  if(!resume) await this.send(CMD.timerReset());
+  await this.send(CMD.timerStart());
+};
+Scale.prototype.pause = function(){
+  if(this.kind === "ck"){ if(this.swAt){ this.swAcc += Date.now() - this.swAt; this.swAt = null; } return Promise.resolve(); }
+  return this.send(CMD.timerPause());
+};
+Scale.prototype.reset = function(){
+  if(this.kind === "ck"){ this.swAcc = 0; this.swAt = null; return Promise.resolve(); }
+  return this.send(CMD.timerReset());
+};
 Scale.prototype.disconnect = function(){ try{ this.dev && this.dev.gatt.disconnect(); }catch(e){} };
+
+Scale.prototype._onCK = function(ev){
+  var v = ev.target.value;
+  if(v.byteLength < 4) return;
+  var type = v.getUint8(0);
+  /* knob pressed: the scale re-zeroes itself on a mode change, so a
+     software offset taken before it would now push the reading negative */
+  if(type === 0x13){ this.off = 0; this.hist = []; return; }
+  if(type !== 0x14 || v.byteLength < 15) return;
+  this.raw = v.getInt32(11, true) / 10;
+  var w = +(this.raw - this.off).toFixed(1);
+  /* flow: weight gained over the last second. shorter windows chase the
+     ±0.1 g jitter; longer ones lag the end of a pour. */
+  var now = Date.now();
+  this.hist.push({ t:now, w:w });
+  while(this.hist.length > 2 && now - this.hist[0].t > 1000) this.hist.shift();
+  var a = this.hist[0], dt = (now - a.t) / 1000;
+  var fl = dt >= 0.3 ? (w - a.w) / dt : 0;
+  /* a resting load jitters ±0.2 g, which reads as ±0.4 g/s — right on the
+     pour-end threshold. real kettle flow never sits below 1 g/s. */
+  if(Math.abs(fl) < 0.6) fl = 0;
+  this.onData({
+    weight: w,
+    flow:   Math.round(fl * 10) / 10,
+    timer:  Math.floor(this._sw() / 1000),
+    over:   false
+  });
+};
 
 /* reassemble: notifications can fragment or abut. notify frames carry no CRC
    (firmware leaves the tail 00 00), so trust header + length only. */
@@ -1222,19 +1299,19 @@ function onState(s){
   var card = $("connCard");
   if(s === "ready"){
     linked = true; card.className = "conn on";
-    setText("cTitle", "Timemore Dot");
+    setText("cTitle", scale ? scale.label : "Scale");
     setText("cLab", batt != null ? "Connected \u00b7 battery "+batt+"%" : "Connected \u2014 pours end on weight");
     setText("cBtn", "Disconnect");
   } else if(s === "scanning" || s === "connecting"){
     card.className = "conn busy";
-    setText("cTitle", s === "scanning" ? "Looking for the Dot" : "Connecting");
+    setText("cTitle", s === "scanning" ? "Looking for your scale" : "Connecting");
     setText("cLab", "Keep the scale awake");
     setText("cBtn", "\u2026");
   } else {
     linked = false; card.className = "conn";
     setText("cTitle", s === "lost" ? "Scale disconnected" : "Connect your scale");
     setText("cLab", s === "lost" ? "Running on the clock \u2014 tap to reconnect"
-                                 : "Tap to pair the Timemore Dot");
+                                 : "Tap to pair your scale");
     setText("cBtn", "Connect");
   }
   if(document.getElementById("autoTog")) drawMode();
@@ -1303,12 +1380,12 @@ $("connCard").onclick = async function(){
     if(n === "NotFoundError"){
       if(!anyAll){
         anyAll = true;
-        setText("cLab", "No Dot in that list \u2014 tap again to show every nearby device."); setText("cBtn", "Scan all");
+        setText("cLab", "Not in that list \u2014 tap again to show every nearby device."); setText("cBtn", "Scan all");
       } else {
-        setText("cLab", "Still nothing. Press the Dot's button to wake it, then retry.");
+        setText("cLab", "Still nothing. Wake the scale, then retry.");
       }
     } else if(n === "NetworkError"){
-      setText("cLab", "Dropped \u2014 force-quit the Timemore app, it is holding the scale.");
+      setText("cLab", "Dropped \u2014 force-quit the scale's own app (Timemore or InSmart Life), it is holding the connection.");
     } else if(n === "SecurityError"){
       setText("cLab", "Blocked \u2014 the page must be https and opened in Bluefy.");
     } else {
@@ -1332,7 +1409,7 @@ function paintScale(){
   var usable = linked && st && weight >= 5 && weight <= 60;
   if(el("sDose").disabled === usable) el("sDose").disabled = !usable;
   setText("sHint", !linked
-    ? "Connect the Dot on the Brew tab to use this."
+    ? "Connect your scale on the Brew tab to use this."
     : usable
       ? "Send " + Math.round(weight) + " g to " + cur.name + " and every pour target rescales."
       : "Put the beans on and wait for the reading to settle.");
@@ -1425,7 +1502,7 @@ function paint(){
       cue = "Ready";
       bigHTML = (linked ? weight.toFixed(1) : "0.0")+'<em>g</em>';
       sub = linked ? "Start, then pour however you like \u2014 every pour gets logged."
-                   : "Connect the Dot to record pours and flow.";
+                   : "Connect your scale to record pours and flow.";
       of = "";
     } else if(armed){
       cue = "Armed"; bigHTML = first+'<em>g</em>';
@@ -1655,7 +1732,7 @@ async function beginRun(resume){
   if(!resume){ clk = 0; }
   $("run").textContent = runLabel(); $("run").className = "go on";
   if(cur.free && !resume && linked) await scale.tare();
-  if(linked){ await scale.start(); }
+  if(linked){ await scale.start(resume); }
   else { t0 = Date.now() - clk*1000; }
   rafOn = false; loop();
   $("run").textContent = runLabel(); $("run").className = "go on";
@@ -1764,7 +1841,7 @@ function drawMode(){
   setText("valveBtn", (vEvents.length && vEvents[vEvents.length-1].s === "closed") ? "Open valve" : "Close valve");
   $("autoTog").setAttribute("aria-pressed", String(auto));
   $("manTog").setAttribute("aria-pressed", String(!auto));
-  setText("modeHint", !linked ? "Connect the Dot to use auto-start"
+  setText("modeHint", !linked ? "Connect your scale to use auto-start"
     : auto ? "Clock starts on first water" : "You start the clock yourself");
   if(!running) $("run").textContent = runLabel();
 }
