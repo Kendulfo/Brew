@@ -720,7 +720,7 @@
   <span class="connDot" id="cDot"></span>
   <span class="connTxt">
     <b id="cTitle">Connect your scale</b>
-    <i id="cLab">Tap to pair your scale</i>
+    <i id="cLab">Tap to pair your scale · v3</i>
   </span>
   <span class="connAct" id="cBtn">Connect</span>
 </button>
@@ -1396,18 +1396,21 @@ $("connCard").onclick = async function(){
   }catch(e){
     onState("idle");
     var n = e && e.name ? e.name : "Error";
-    if(n === "NotFoundError"){
-      if(!anyAll){
-        anyAll = true;
-        setText("cLab", "Not in that list \u2014 tap again to show every nearby device."); setText("cBtn", "Scan all");
-      } else {
-        setText("cLab", "Still nothing. Wake the scale, then retry.");
-      }
+    var why = " [" + n + (e && e.message ? ": " + e.message : "") + "]";
+    /* a cancelled picker is reported differently across engines, so any
+       failure of the filtered scan offers the unfiltered one next */
+    if(!anyAll && n !== "NetworkError" && n !== "SecurityError"){
+      anyAll = true;
+      setText("cLab", "Not in that list \u2014 tap again to show every nearby device." + why); setText("cBtn", "Scan all");
+    } else if(n === "NotFoundError"){
+      anyAll = false;
+      setText("cLab", "Still nothing. Wake the scale, then retry." + why);
     } else if(n === "NetworkError"){
       setText("cLab", "Dropped \u2014 force-quit the scale's own app (Timemore or InSmart Life), it is holding the connection.");
     } else if(n === "SecurityError"){
       setText("cLab", "Blocked \u2014 the page must be https and opened in Bluefy.");
     } else {
+      anyAll = false;
       setText("cLab", n + ": " + ((e && e.message) || "unknown"));
     }
   }
