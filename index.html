@@ -720,7 +720,7 @@
   <span class="connDot" id="cDot"></span>
   <span class="connTxt">
     <b id="cTitle">Connect your scale</b>
-    <i id="cLab">Tap to pair your scale · v3</i>
+    <i id="cLab">Tap to pair your scale · v4</i>
   </span>
   <span class="connAct" id="cBtn">Connect</span>
 </button>
@@ -978,7 +978,7 @@ var CMD = {
    No flow and no timer on the wire: flow is derived from weight here, the
    timer is a local stopwatch, tare is a software offset. */
 var CK_WEIGHT = "0000fff3-0000-1000-8000-00805f9b34fb";
-var CK_COMPANY = 0xCF48;   /* advert bytes 48 CF, then the MAC CF:EA:05:14:D0:18 */
+var CK_COMPANY = 0xCF4B;   /* raw advert 4B CF EA 05 14 D0 18 — nRF's label font makes it look like CF48 */
 function isCK(name){ return /^CK\d/i.test(name || ""); }
 function isDotName(name){ return /^(dot|tes|timemore)/i.test(name || ""); }
 
@@ -1035,7 +1035,14 @@ Scale.prototype.connect = async function(anyAll){
       var bl = await (await bs.getCharacteristic("battery_level")).readValue();
       this.onState("battery:" + bl.getUint8(0));
     }catch(e){}
+    window.ckDebug = "subscribed to FFF3 \u00b7 waiting for packets";
     this.onState("ready");
+    /* surface the debug line every 500 ms while linked */
+    clearInterval(this.dbgT);
+    this.dbgT = setInterval(function(){
+      var c = document.getElementById("cLab");
+      if(c && window.ckDebug && linked) c.textContent = window.ckDebug;
+    }, 500);
     return;
   }
   this.kind = "dot"; this.label = "Timemore Dot";
@@ -1078,6 +1085,10 @@ Scale.prototype.disconnect = function(){ try{ this.dev && this.dev.gatt.disconne
 
 Scale.prototype._onCK = function(ev){
   var v = ev.target.value;
+  /* debug: packet count + last raw bytes on the connect card */
+  this.pk = (this.pk || 0) + 1;
+  var hx = []; for(var j=0;j<v.byteLength;j++) hx.push(("0"+v.getUint8(j).toString(16)).slice(-2));
+  window.ckDebug = "pkts " + this.pk + " \u00b7 " + hx.join(" ");
   if(v.byteLength < 4) return;
   var type = v.getUint8(0);
   /* knob pressed: the scale re-zeroes itself on a mode change, so a
