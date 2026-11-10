@@ -978,7 +978,7 @@ var CMD = {
    No flow and no timer on the wire: flow is derived from weight here, the
    timer is a local stopwatch, tare is a software offset. */
 var CK_WEIGHT = "0000fff3-0000-1000-8000-00805f9b34fb";
-var CK_COMPANY = 0xCF4B;   /* advert bytes 4B CF, little-endian */
+var CK_COMPANY = 0xCF48;   /* advert bytes 48 CF, then the MAC CF:EA:05:14:D0:18 */
 function isCK(name){ return /^CK\d/i.test(name || ""); }
 function isDotName(name){ return /^(dot|tes|timemore)/i.test(name || ""); }
 
