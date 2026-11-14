@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CK863 Probe</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* One-screen bench tool: connect, watch raw bytes, copy the log out. */
+  :root{
+    --bg:#0A0A0B; --card:#141416; --line:#232327;
+    --ink:#F4F4F2; --mute:#86868C; --dim:#55555C;
+    --hot:#FF6A1F; --ok:#34C759; --bad:#FF3B30;
+    --ui:-apple-system,"SF Pro Display","Segoe UI",system-ui,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--ink);font-family:var(--ui);
+    font-variant-numeric:tabular-nums;max-width:560px;margin:0 auto;
+    padding-left:max(16px,env(safe-area-inset-left,0px));
+    padding-right:max(16px,env(safe-area-inset-right,0px));
+    padding-block:18px 40px}
+  button{font:inherit;font-family:var(--ui);cursor:pointer;border:0;
+    touch-action:manipulation;user-select:none;color:var(--ink)}
+
+  h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+  .lede{font-size:13.5px;color:var(--mute);line-height:1.5;margin-top:6px}
+
+  .big{display:block;width:100%;margin-top:16px;background:var(--hot);color:#0A0A0B;
+    font-size:17px;font-weight:700;border-radius:14px;padding:19px;letter-spacing:.01em}
+  .big[disabled]{opacity:.4}
+  .big.alt{background:#18181B;color:var(--ink);border:1px solid var(--line);font-weight:600;font-size:15px}
+
+  .status{display:flex;align-items:center;gap:9px;margin-top:14px;font-size:13.5px;color:var(--mute)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--dim);flex:0 0 auto}
+  .dot.on{background:var(--ok)} .dot.err{background:var(--bad)}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
+  .cell{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-width:0}
+  .cell dt{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+  .cell dd{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-top:5px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cell dd small{font-size:13px;font-weight:400;color:var(--mute);margin-left:3px}
+  .cell.wide{grid-column:1 / -1}
+  .cell.wide dd{font-size:15px;font-weight:500;letter-spacing:0}
+
+  .row{display:flex;gap:9px;margin-top:9px}
+  .row button{flex:1;background:#18181B;border:1px solid var(--line);border-radius:12px;
+    padding:14px 8px;font-size:14px;font-weight:600}
+  .row button:active{background:#202024}
+
+  h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);
+    font-weight:600;margin:24px 0 9px;display:flex;justify-content:space-between;align-items:center}
+  h2 button{font-size:11px;letter-spacing:.06em;color:var(--hot);background:none;font-weight:700}
+  pre{background:#101013;border:1px solid var(--line);border-radius:12px;padding:12px;
+    font-family:var(--mono);font-size:10.5px;line-height:1.55;color:#C9C9CF;
+    max-height:300px;overflow:auto;white-space:pre;word-break:normal}
+  .hint{font-size:12.5px;color:var(--dim);line-height:1.5;margin-top:9px}
+  .warn{background:#1B1511;border:1px solid rgba(255,106,31,.35);border-radius:12px;
+    padding:12px 14px;font-size:13px;color:#D8A78A;line-height:1.5;margin-top:16px}
+</style>
+</head>
+<body>
+
+
+<h1>CK863 Probe</h1>
+<p class="lede">Connects to the scale and shows the raw bytes it sends. Put weight
+on it, press its buttons, then copy the log.</p>
+
+<button class="big" id="go">Connect to scale</button>
+<div class="status"><span class="dot" id="dot"></span><span id="st">Not connected</span></div>
+
+<div class="grid">
+  <div class="cell"><dt>Weight</dt><dd id="w">—</dd></div>
+  <div class="cell"><dt>Flow</dt><dd id="f">—</dd></div>
+  <div class="cell"><dt>Timer</dt><dd id="t">—</dd></div>
+  <div class="cell"><dt>Ratio</dt><dd id="r">—</dd></div>
+  <div class="cell wide"><dt>Mode · stage · status</dt><dd id="m">—</dd></div>
+</div>
+
+<div class="row">
+  <button id="bTare">Send tare</button>
+  <button id="bRatio">Send 1:16.7</button>
+</div>
+<p class="hint">If the scale tares, or its screen shows 1:16.7, the commands work.</p>
+
+<h2>Raw frames <button id="copy">Copy all</button></h2>
+<pre id="log">Waiting…</pre>
+
+<div class="warn" id="browserWarn" hidden>
+  This browser has no Bluetooth. On iPhone use <b>Bluefy</b>; on Android use Chrome.
+</div>
+
+<script>
+(function(){
+  var SVC="0000fff0-0000-1000-8000-00805f9b34fb",
+      RXU="0000fff1-0000-1000-8000-00805f9b34fb",
+      TXU="0000fff2-0000-1000-8000-00805f9b34fb";
+
+  var WS=["realtime","stable","overload","?"],
+      TS=["idle","running","paused","timeout"],
+      MD=["pourover1","pourover2","espresso","?"],
+      SG=["setRatio","placePot","placeFilter","addCoffee","waitWater","pouring","finished","showRatio"];
+
+  var el=function(i){return document.getElementById(i);};
+  var lines=[], tx=null, t0=Date.now(), seen={};
+
+  function say(s,cls){ el("st").textContent=s; el("dot").className="dot"+(cls?" "+cls:""); }
+  function hex(u8){ return Array.prototype.map.call(u8,function(b){
+    return b.toString(16).padStart(2,"0").toUpperCase(); }).join(" "); }
+
+  function push(s){
+    lines.push(s);
+    if(lines.length>400) lines.shift();
+    el("log").textContent = lines.join("\n");
+    el("log").scrollTop = el("log").scrollHeight;
+  }
+
+  function u16(b,i){ return (b[i]&255)|((b[i+1]&255)<<8); }
+
+  function decode(b){
+    if(b.length<19) return null;
+    var a=b[2], s=b[3],
+        d={ neg:((a>>6)&1)===1, ws:WS[(a>>4)&3], ts:TS[(a>>2)&3], mode:MD[a&3],
+            stage:SG[s&15]||("stage"+(s&15)),
+            flow:u16(b,5)/10, timer:u16(b,7), ratio:u16(b,9)/10,
+            cup:u16(b,17)/10 };
+    if(d.mode==="pourover2"){ d.weight=u16(b,11)/10; d.liquid=u16(b,13)/10; }
+    else { d.weight=u16(b,11)/10; d.dose=u16(b,13)/10; }
+    if(d.neg) d.weight=-d.weight;
+    return d;
+  }
+
+  function onFrame(ev){
+    var dv=ev.target.value,
+        b=new Uint8Array(dv.buffer,dv.byteOffset,dv.byteLength);
+    var ms=((Date.now()-t0)/1000).toFixed(1);
+    var h=hex(b);
+
+    /* only log a line when the bytes actually change, so the log stays readable */
+    var key=h.slice(0,11)+"|"+b.length;
+    if(!seen[key]){ seen[key]=1; push("--- new frame shape: len "+b.length+" ---"); }
+    if(lines.length===0 || lines[lines.length-1].slice(7)!==h) push(ms.padStart(6)+" "+h);
+
+    var d=decode(b);
+    if(!d) return;
+    el("w").innerHTML=d.weight.toFixed(1)+"<small>g</small>";
+    el("f").innerHTML=d.flow.toFixed(1)+"<small>g/s</small>";
+    el("t").textContent=Math.floor(d.timer/60)+":"+String(d.timer%60).padStart(2,"0");
+    el("r").textContent="1:"+d.ratio.toFixed(1);
+    el("m").textContent=d.mode+" · "+d.stage+" · "+d.ws+" · timer "+d.ts;
+  }
+
+  el("go").addEventListener("click", async function(){
+    if(!navigator.bluetooth){ el("browserWarn").hidden=false; say("No Bluetooth in this browser","err"); return; }
+    try{
+      say("Choose your scale…");
+      var dev = await navigator.bluetooth.requestDevice({
+        acceptAllDevices:true, optionalServices:[SVC]
+      });
+      push("device: "+(dev.name||"(no name)"));
+      dev.addEventListener("gattserverdisconnected", function(){ say("Scale disconnected","err"); });
+      say("Connecting…");
+      var srv = await dev.gatt.connect();
+      var svc = await srv.getPrimaryService(SVC);
+      var rx  = await svc.getCharacteristic(RXU);
+      try { tx = await svc.getCharacteristic(TXU); }
+      catch(e){ push("note: no FFF2 write characteristic — commands disabled"); }
+      rx.addEventListener("characteristicvaluechanged", onFrame);
+      await rx.startNotifications();
+      t0=Date.now();
+      say("Connected — put something on the scale","on");
+      el("go").textContent="Connected";
+      el("go").disabled=true;
+    }catch(e){
+      say("Failed: "+(e.message||e),"err");
+      push("ERROR: "+(e.message||e));
+    }
+  });
+
+  async function send(bytes,label){
+    if(!tx){ push("cannot send "+label+" — no write characteristic"); return; }
+    try{
+      await tx.writeValueWithoutResponse(bytes);
+      push(">>> sent "+label+": "+hex(bytes));
+    }catch(e){ push(">>> send failed ("+label+"): "+(e.message||e)); }
+  }
+  el("bTare").addEventListener("click", function(){
+    send(new Uint8Array([0x50,0x00]), "tare");
+  });
+  el("bRatio").addEventListener("click", function(){
+    send(new Uint8Array([0x57,0x02,0xA7,0x00]), "ratio 1:16.7");
+  });
+
+  el("copy").addEventListener("click", function(){
+    var txt=el("log").textContent;
+    navigator.clipboard.writeText(txt).then(function(){
+      el("copy").textContent="Copied";
+      setTimeout(function(){ el("copy").textContent="Copy all"; },1400);
+    }).catch(function(){
+      var r=document.createRange(); r.selectNodeContents(el("log"));
+      var s=getSelection(); s.removeAllRanges(); s.addRange(r);
+      el("copy").textContent="Select + copy";
+    });
+  });
+
+  if(!navigator.bluetooth) el("browserWarn").hidden=false;
+})();
+</script>
+
+</body>
+</html>
