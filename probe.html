@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CK863 Probe 2</title>
+<title>CK863 Probe 4</title>
 <style>
   :root{
     --bg:#0A0A0B; --card:#141416; --line:#232327;
@@ -54,12 +54,14 @@
 </head>
 <body>
 
-<h1>CK863 Probe 2</h1>
-<p class="lede">Lists everything the scale offers, listens on every channel at once,
-and shows which one the data comes from.</p>
+<h1>CK863 Probe 4</h1>
+<p class="lede">Your tare worked. Now we hunt for whatever switches the weight stream on.</p>
 
 <button class="big" id="go">Connect to scale</button>
 <div class="status"><span class="dot" id="dot"></span><span id="st">Not connected</span></div>
+
+<h2>Scale ID <button id="copyId">Copy</button></h2>
+<pre id="idbox">Connect to read.</pre>
 
 <div class="grid">
   <div class="cell"><dt>Weight</dt><dd id="w">—</dd></div>
@@ -71,6 +73,12 @@ and shows which one the data comes from.</p>
 
 <h2>What the scale has</h2>
 <pre id="map">Not connected yet.</pre>
+
+<h2>Wake it up</h2>
+<button class="big" id="sweep" style="background:#18181B;color:var(--ink);border:1px solid var(--line);font-size:15px">Run command sweep</button>
+<p class="hint">Sends every known safe command one at a time and logs what the scale
+answers. Put a mug on the scale first, so if one of them starts the stream we see
+real numbers. Destructive commands (factory reset, clear history) are excluded.</p>
 
 <h2>Try a command</h2>
 <div class="cmds">
@@ -110,7 +118,7 @@ and shows which one the data comes from.</p>
       SG=["setRatio","placePot","placeFilter","addCoffee","waitWater","pouring","finished","showRatio"];
 
   var el=function(i){return document.getElementById(i);};
-  var lines=[], chars={}, t0=Date.now(), lastByChar={};
+  var lines=[], chars={}, t0=Date.now(), lastByChar={}, sweeping=false;
 
   function say(s,cls){ el("st").textContent=s; el("dot").className="dot"+(cls?" "+cls:""); }
   function hex(u8){ return Array.prototype.map.call(u8,function(b){
@@ -138,7 +146,8 @@ and shows which one the data comes from.</p>
   function onFrame(uuid, dv){
     var b=new Uint8Array(dv.buffer,dv.byteOffset,dv.byteLength);
     var h=hex(b), id=shortU(uuid);
-    if(lastByChar[id]===h) return;          /* only log real changes */
+    /* during a sweep every reply matters, even a repeat */
+    if(!sweeping && lastByChar[id]===h) return;
     lastByChar[id]=h;
     push(((Date.now()-t0)/1000).toFixed(1).padStart(6)+" ["+id+"] "+h);
 
@@ -197,6 +206,24 @@ and shows which one the data comes from.</p>
           }
         }
       }
+      /* 180A device-info strings. These are exactly what the firmware server
+         wants: model number and firmware revision. */
+      var want={"2A24":"model","2A26":"firmware","2A29":"maker","2A27":"hardware","2A25":"serial"};
+      var id={}, dec=new TextDecoder();
+      for(var key in want){
+        if(!chars[key]) continue;
+        try{
+          var v=await chars[key].readValue();
+          id[want[key]]=dec.decode(v).replace(/\0+$/,"").trim();
+        }catch(e){ id[want[key]]="(unreadable)"; }
+      }
+      id.bleName = dev.name||"(no name)";
+      var idLines=[];
+      for(var k2 in id) idLines.push(k2.padEnd(10)+" "+id[k2]);
+      el("idbox").textContent = idLines.length ? idLines.join("\n") : "no device-info service";
+      push("--- scale id ---");
+      idLines.forEach(function(l){ push("  "+l); });
+
       map.push("");
       map.push("listening on "+subscribed+" channel(s)");
       el("map").textContent=map.join("\n");
@@ -221,6 +248,40 @@ and shows which one the data comes from.</p>
         push(">>> sent to "+want+": "+hex(u8));
       }catch(e){ push(">>> send to "+want+" FAILED: "+(e.message||e)); }
     });
+  });
+
+  /* Safe subset of the control-channel vocabulary found in the vendor SDK.
+     Deliberately excluded: 0900 (factory reset) and every 16xx (clears user data
+     and history). "get"-shaped commands end 0200 and should answer harmlessly. */
+  var SWEEP = ["0200","0B00","1000","2400","2700","2800",
+               "0E0100","0F0100","0F0101","450100",
+               "03020200","1C020200","31020200","42020200","59020200","58020200"];
+
+  el("sweep").addEventListener("click", async function(){
+    var c = chars["FFF1"];
+    if(!c){ push(">>> no FFF1 to sweep"); return; }
+    el("sweep").disabled = true; sweeping = true;
+    push("=== sweep start (" + SWEEP.length + " commands) ===");
+    for (var i = 0; i < SWEEP.length; i++) {
+      var h = SWEEP[i], u8 = new Uint8Array(h.length/2), k;
+      for (k = 0; k < u8.length; k++) u8[k] = parseInt(h.substr(k*2,2),16);
+      try {
+        if (c.properties.writeWithoutResponse) await c.writeValueWithoutResponse(u8);
+        else await c.writeValue(u8);
+        push(">>> " + h);
+      } catch(e){ push(">>> " + h + " FAILED: " + (e.message||e)); }
+      await new Promise(function(r){ setTimeout(r, 450); });   /* let it answer */
+    }
+    push("=== sweep done ===");
+    sweeping = false;
+    el("sweep").disabled = false;
+  });
+
+  el("copyId").addEventListener("click", function(){
+    navigator.clipboard.writeText(el("idbox").textContent).then(function(){
+      el("copyId").textContent="Copied";
+      setTimeout(function(){ el("copyId").textContent="Copy"; },1400);
+    }).catch(function(){ el("copyId").textContent="Select manually"; });
   });
 
   el("copy").addEventListener("click", function(){
