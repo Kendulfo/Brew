@@ -3,10 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CK863 Probe</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<title>CK863 Probe 2</title>
 <style>
-  /* One-screen bench tool: connect, watch raw bytes, copy the log out. */
   :root{
     --bg:#0A0A0B; --card:#141416; --line:#232327;
     --ink:#F4F4F2; --mute:#86868C; --dim:#55555C;
@@ -23,19 +21,14 @@
     padding-block:18px 40px}
   button{font:inherit;font-family:var(--ui);cursor:pointer;border:0;
     touch-action:manipulation;user-select:none;color:var(--ink)}
-
   h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
   .lede{font-size:13.5px;color:var(--mute);line-height:1.5;margin-top:6px}
-
   .big{display:block;width:100%;margin-top:16px;background:var(--hot);color:#0A0A0B;
-    font-size:17px;font-weight:700;border-radius:14px;padding:19px;letter-spacing:.01em}
+    font-size:17px;font-weight:700;border-radius:14px;padding:19px}
   .big[disabled]{opacity:.4}
-  .big.alt{background:#18181B;color:var(--ink);border:1px solid var(--line);font-weight:600;font-size:15px}
-
   .status{display:flex;align-items:center;gap:9px;margin-top:14px;font-size:13.5px;color:var(--mute)}
   .dot{width:9px;height:9px;border-radius:50%;background:var(--dim);flex:0 0 auto}
   .dot.on{background:var(--ok)} .dot.err{background:var(--bad)}
-
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
   .cell{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-width:0}
   .cell dt{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
@@ -43,30 +36,27 @@
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .cell dd small{font-size:13px;font-weight:400;color:var(--mute);margin-left:3px}
   .cell.wide{grid-column:1 / -1}
-  .cell.wide dd{font-size:15px;font-weight:500;letter-spacing:0}
-
-  .row{display:flex;gap:9px;margin-top:9px}
-  .row button{flex:1;background:#18181B;border:1px solid var(--line);border-radius:12px;
-    padding:14px 8px;font-size:14px;font-weight:600}
-  .row button:active{background:#202024}
-
+  .cell.wide dd{font-size:14px;font-weight:500;letter-spacing:0}
   h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);
-    font-weight:600;margin:24px 0 9px;display:flex;justify-content:space-between;align-items:center}
+    font-weight:600;margin:24px 0 9px;display:flex;justify-content:space-between;align-items:center;gap:10px}
   h2 button{font-size:11px;letter-spacing:.06em;color:var(--hot);background:none;font-weight:700}
   pre{background:#101013;border:1px solid var(--line);border-radius:12px;padding:12px;
     font-family:var(--mono);font-size:10.5px;line-height:1.55;color:#C9C9CF;
-    max-height:300px;overflow:auto;white-space:pre;word-break:normal}
+    max-height:280px;overflow:auto;white-space:pre}
   .hint{font-size:12.5px;color:var(--dim);line-height:1.5;margin-top:9px}
+  .cmds{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .cmds button{background:#18181B;border:1px solid var(--line);border-radius:12px;
+    padding:13px 6px;font-size:13.5px;font-weight:600}
+  .cmds button:active{background:#202024}
   .warn{background:#1B1511;border:1px solid rgba(255,106,31,.35);border-radius:12px;
     padding:12px 14px;font-size:13px;color:#D8A78A;line-height:1.5;margin-top:16px}
 </style>
 </head>
 <body>
 
-
-<h1>CK863 Probe</h1>
-<p class="lede">Connects to the scale and shows the raw bytes it sends. Put weight
-on it, press its buttons, then copy the log.</p>
+<h1>CK863 Probe 2</h1>
+<p class="lede">Lists everything the scale offers, listens on every channel at once,
+and shows which one the data comes from.</p>
 
 <button class="big" id="go">Connect to scale</button>
 <div class="status"><span class="dot" id="dot"></span><span id="st">Not connected</span></div>
@@ -79,11 +69,18 @@ on it, press its buttons, then copy the log.</p>
   <div class="cell wide"><dt>Mode · stage · status</dt><dd id="m">—</dd></div>
 </div>
 
-<div class="row">
-  <button id="bTare">Send tare</button>
-  <button id="bRatio">Send 1:16.7</button>
+<h2>What the scale has</h2>
+<pre id="map">Not connected yet.</pre>
+
+<h2>Try a command</h2>
+<div class="cmds">
+  <button data-c="FFF1" data-h="5000">Tare &rarr; FFF1</button>
+  <button data-c="FFF2" data-h="5000">Tare &rarr; FFF2</button>
+  <button data-c="FFF1" data-h="5702A700">1:16.7 &rarr; FFF1</button>
+  <button data-c="FFF2" data-h="5702A700">1:16.7 &rarr; FFF2</button>
 </div>
-<p class="hint">If the scale tares, or its screen shows 1:16.7, the commands work.</p>
+<p class="hint">Try all four. Watch the scale — if it zeroes, or its screen shows
+1:16.7, remember which button did it.</p>
 
 <h2>Raw frames <button id="copy">Copy all</button></h2>
 <pre id="log">Waiting…</pre>
@@ -94,9 +91,18 @@ on it, press its buttons, then copy the log.</p>
 
 <script>
 (function(){
-  var SVC="0000fff0-0000-1000-8000-00805f9b34fb",
-      RXU="0000fff1-0000-1000-8000-00805f9b34fb",
-      TXU="0000fff2-0000-1000-8000-00805f9b34fb";
+  /* Web Bluetooth only hands over services named up front, so declare the whole
+     vendor range instead of guessing which one this scale uses. */
+  var OPT = [];
+  (function(){
+    function u(n){ return "0000" + n.toString(16).padStart(4,"0") + "-0000-1000-8000-00805f9b34fb"; }
+    var i;
+    for (i = 0xFF00; i <= 0xFF0F; i++) OPT.push(u(i));
+    for (i = 0xFFE0; i <= 0xFFFF; i++) OPT.push(u(i));
+    for (i = 0xFEE0; i <= 0xFEEF; i++) OPT.push(u(i));
+    [0x1800,0x1801,0x180A,0x180F,0x181D].forEach(function(n){ OPT.push(u(n)); });
+    OPT.push("6e400001-b5a3-f393-e0a9-e50e24dcca9e");   /* Nordic UART */
+  })();
 
   var WS=["realtime","stable","overload","?"],
       TS=["idle","running","paused","timeout"],
@@ -104,19 +110,17 @@ on it, press its buttons, then copy the log.</p>
       SG=["setRatio","placePot","placeFilter","addCoffee","waitWater","pouring","finished","showRatio"];
 
   var el=function(i){return document.getElementById(i);};
-  var lines=[], tx=null, t0=Date.now(), seen={};
+  var lines=[], chars={}, t0=Date.now(), lastByChar={};
 
   function say(s,cls){ el("st").textContent=s; el("dot").className="dot"+(cls?" "+cls:""); }
   function hex(u8){ return Array.prototype.map.call(u8,function(b){
     return b.toString(16).padStart(2,"0").toUpperCase(); }).join(" "); }
-
+  function shortU(u){ var m=/^0000([0-9a-f]{4})-/.exec(u); return m?m[1].toUpperCase():u.slice(0,8); }
   function push(s){
-    lines.push(s);
-    if(lines.length>400) lines.shift();
-    el("log").textContent = lines.join("\n");
-    el("log").scrollTop = el("log").scrollHeight;
+    lines.push(s); if(lines.length>500) lines.shift();
+    el("log").textContent=lines.join("\n");
+    el("log").scrollTop=el("log").scrollHeight;
   }
-
   function u16(b,i){ return (b[i]&255)|((b[i+1]&255)<<8); }
 
   function decode(b){
@@ -124,24 +128,19 @@ on it, press its buttons, then copy the log.</p>
     var a=b[2], s=b[3],
         d={ neg:((a>>6)&1)===1, ws:WS[(a>>4)&3], ts:TS[(a>>2)&3], mode:MD[a&3],
             stage:SG[s&15]||("stage"+(s&15)),
-            flow:u16(b,5)/10, timer:u16(b,7), ratio:u16(b,9)/10,
-            cup:u16(b,17)/10 };
-    if(d.mode==="pourover2"){ d.weight=u16(b,11)/10; d.liquid=u16(b,13)/10; }
-    else { d.weight=u16(b,11)/10; d.dose=u16(b,13)/10; }
+            flow:u16(b,5)/10, timer:u16(b,7), ratio:u16(b,9)/10 };
+    d.weight=u16(b,11)/10;
+    d.dose=u16(b,13)/10;
     if(d.neg) d.weight=-d.weight;
     return d;
   }
 
-  function onFrame(ev){
-    var dv=ev.target.value,
-        b=new Uint8Array(dv.buffer,dv.byteOffset,dv.byteLength);
-    var ms=((Date.now()-t0)/1000).toFixed(1);
-    var h=hex(b);
-
-    /* only log a line when the bytes actually change, so the log stays readable */
-    var key=h.slice(0,11)+"|"+b.length;
-    if(!seen[key]){ seen[key]=1; push("--- new frame shape: len "+b.length+" ---"); }
-    if(lines.length===0 || lines[lines.length-1].slice(7)!==h) push(ms.padStart(6)+" "+h);
+  function onFrame(uuid, dv){
+    var b=new Uint8Array(dv.buffer,dv.byteOffset,dv.byteLength);
+    var h=hex(b), id=shortU(uuid);
+    if(lastByChar[id]===h) return;          /* only log real changes */
+    lastByChar[id]=h;
+    push(((Date.now()-t0)/1000).toFixed(1).padStart(6)+" ["+id+"] "+h);
 
     var d=decode(b);
     if(!d) return;
@@ -152,62 +151,88 @@ on it, press its buttons, then copy the log.</p>
     el("m").textContent=d.mode+" · "+d.stage+" · "+d.ws+" · timer "+d.ts;
   }
 
+  function props(c){
+    var p=c.properties, out=[];
+    ["read","write","writeWithoutResponse","notify","indicate"].forEach(function(k){
+      if(p[k]) out.push(k==="writeWithoutResponse"?"writeNR":k);
+    });
+    return out.join(",")||"none";
+  }
+
   el("go").addEventListener("click", async function(){
-    if(!navigator.bluetooth){ el("browserWarn").hidden=false; say("No Bluetooth in this browser","err"); return; }
+    if(!navigator.bluetooth){ el("browserWarn").hidden=false; say("No Bluetooth here","err"); return; }
     try{
       say("Choose your scale…");
-      var dev = await navigator.bluetooth.requestDevice({
-        acceptAllDevices:true, optionalServices:[SVC]
-      });
+      var dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true, optionalServices:OPT});
       push("device: "+(dev.name||"(no name)"));
-      dev.addEventListener("gattserverdisconnected", function(){ say("Scale disconnected","err"); });
+      dev.addEventListener("gattserverdisconnected",function(){ say("Disconnected","err"); });
+
       say("Connecting…");
-      var srv = await dev.gatt.connect();
-      var svc = await srv.getPrimaryService(SVC);
-      var rx  = await svc.getCharacteristic(RXU);
-      try { tx = await svc.getCharacteristic(TXU); }
-      catch(e){ push("note: no FFF2 write characteristic — commands disabled"); }
-      rx.addEventListener("characteristicvaluechanged", onFrame);
-      await rx.startNotifications();
+      var srv=await dev.gatt.connect();
+      el("go").textContent="Connected"; el("go").disabled=true;
+
+      var svcs=await srv.getPrimaryServices();
+      var map=["device: "+(dev.name||"(no name)")], subscribed=0, i, j;
+
+      for(i=0;i<svcs.length;i++){
+        var s=svcs[i];
+        map.push("service "+shortU(s.uuid));
+        var cs=[];
+        try{ cs=await s.getCharacteristics(); }
+        catch(e){ map.push("   (cannot list characteristics)"); continue; }
+        for(j=0;j<cs.length;j++){
+          var c=cs[j];
+          map.push("   char "+shortU(c.uuid)+"   "+props(c));
+          chars[shortU(c.uuid)]=c;
+          /* listen on EVERY channel that can notify — no guessing which is which */
+          if(c.properties.notify||c.properties.indicate){
+            try{
+              c.addEventListener("characteristicvaluechanged",function(ev){
+                onFrame(ev.target.uuid, ev.target.value);
+              });
+              await c.startNotifications();
+              subscribed++;
+              map.push("        listening");
+            }catch(e){ map.push("        listen FAILED: "+(e.message||e)); }
+          }
+        }
+      }
+      map.push("");
+      map.push("listening on "+subscribed+" channel(s)");
+      el("map").textContent=map.join("\n");
       t0=Date.now();
-      say("Connected — put something on the scale","on");
-      el("go").textContent="Connected";
-      el("go").disabled=true;
+      say(subscribed ? "Listening — put weight on the scale"
+                     : "Connected, but nothing to listen to", subscribed?"on":"err");
     }catch(e){
       say("Failed: "+(e.message||e),"err");
       push("ERROR: "+(e.message||e));
     }
   });
 
-  async function send(bytes,label){
-    if(!tx){ push("cannot send "+label+" — no write characteristic"); return; }
-    try{
-      await tx.writeValueWithoutResponse(bytes);
-      push(">>> sent "+label+": "+hex(bytes));
-    }catch(e){ push(">>> send failed ("+label+"): "+(e.message||e)); }
-  }
-  el("bTare").addEventListener("click", function(){
-    send(new Uint8Array([0x50,0x00]), "tare");
-  });
-  el("bRatio").addEventListener("click", function(){
-    send(new Uint8Array([0x57,0x02,0xA7,0x00]), "ratio 1:16.7");
+  Array.prototype.forEach.call(document.querySelectorAll(".cmds button"), function(btn){
+    btn.addEventListener("click", async function(){
+      var want=btn.getAttribute("data-c"), h=btn.getAttribute("data-h"), c=chars[want];
+      if(!c){ push(">>> "+want+" is not present on this scale"); return; }
+      var u8=new Uint8Array(h.length/2), i;
+      for(i=0;i<u8.length;i++) u8[i]=parseInt(h.substr(i*2,2),16);
+      try{
+        if(c.properties.writeWithoutResponse) await c.writeValueWithoutResponse(u8);
+        else await c.writeValue(u8);
+        push(">>> sent to "+want+": "+hex(u8));
+      }catch(e){ push(">>> send to "+want+" FAILED: "+(e.message||e)); }
+    });
   });
 
   el("copy").addEventListener("click", function(){
-    var txt=el("log").textContent;
+    var txt="=== MAP ===\n"+el("map").textContent+"\n\n=== FRAMES ===\n"+el("log").textContent;
     navigator.clipboard.writeText(txt).then(function(){
       el("copy").textContent="Copied";
       setTimeout(function(){ el("copy").textContent="Copy all"; },1400);
-    }).catch(function(){
-      var r=document.createRange(); r.selectNodeContents(el("log"));
-      var s=getSelection(); s.removeAllRanges(); s.addRange(r);
-      el("copy").textContent="Select + copy";
-    });
+    }).catch(function(){ el("copy").textContent="Select manually"; });
   });
 
   if(!navigator.bluetooth) el("browserWarn").hidden=false;
 })();
 </script>
-
 </body>
 </html>
